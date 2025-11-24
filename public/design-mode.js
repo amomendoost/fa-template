@@ -1,5 +1,5 @@
 /**
- * 0xminds Design Mode Script
+ * Noqte Design Mode Script
  * This script enables visual editing of components in the iframe preview
  */
 
@@ -262,13 +262,13 @@
       return false;
     }
 
-    // Skip "Made with 0xminds" link
-    if (element.classList.contains('made-by-0xminds')) {
+    // Skip "Made with noqte" link
+    if (element.classList.contains('made-by-noqte')) {
       return false;
     }
 
-    // Skip children of "Made with 0xminds" link
-    if (element.closest('.made-by-0xminds')) {
+    // Skip children of "Made with noqte" link
+    if (element.closest('.made-by-noqte')) {
       return false;
     }
 
