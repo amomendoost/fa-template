@@ -119,3 +119,140 @@ This project includes comprehensive Cursor rules in `.cursor/rules/` that auto-a
 - **Service Rules** (`services.mdc`) - Auto-loads when editing `src/lib/**`
 
 Reference with `@rule-name` in prompts (e.g., `@quality` for quality checklist)
+
+## Payment Infrastructure
+
+Built-in payment system supporting multiple Iranian and international gateways.
+
+### Available Gateways
+
+| Gateway | ID | Type | Currency |
+|---------|-----|------|----------|
+| زیبال | `zibal` | Iranian | IRR |
+| زرین‌پال | `zarinpal` | Iranian | IRR |
+| آیدی‌پی | `idpay` | Iranian | IRR |
+| پی‌استار | `paystar` | Iranian | IRR |
+| نکست‌پی | `nextpay` | Iranian | IRR |
+| OxaPay | `oxapay` | International (Crypto) | USD |
+| Stripe | `stripe` | International | USD |
+
+### Quick Start - Simple Payment Button
+
+```tsx
+import { PaymentButton } from '@/components/payment';
+
+function ProductPage() {
+  return (
+    <PaymentButton
+      gateway="zibal"
+      amount={500000}  // 50,000 تومان (in Rials)
+      description="خرید محصول"
+      orderId="order-123"
+      onError={(error) => console.error(error)}
+    />
+  );
+}
+```
+
+### Payment Card with Gateway Selection
+
+```tsx
+import { PaymentCard } from '@/components/payment';
+
+function CheckoutPage() {
+  return (
+    <PaymentCard
+      defaultGateway="zibal"
+      gatewayType="iranian"  // or "international" or "all"
+      description="پرداخت سفارش"
+      orderId="order-456"
+      onPaymentCreated={(response) => {
+        console.log('Redirecting to:', response.data?.payment_url);
+      }}
+    />
+  );
+}
+```
+
+### Using Hooks Directly
+
+```tsx
+import { usePayment } from '@/hooks/use-payment';
+
+function CustomPayment() {
+  const { createPayment, isLoading, error } = usePayment({
+    gateway: 'zarinpal',
+    autoRedirect: true,
+  });
+
+  const handlePay = async () => {
+    await createPayment({
+      amount: 100000, // 10,000 تومان
+      description: 'پرداخت سفارشی',
+    });
+  };
+
+  return (
+    <button onClick={handlePay} disabled={isLoading}>
+      پرداخت
+    </button>
+  );
+}
+```
+
+### Payment Callback Handling
+
+The callback page is already configured at `/payment/callback`. After payment:
+
+```tsx
+import { usePaymentVerify } from '@/hooks/use-payment-verify';
+
+function MyCallbackPage() {
+  const { isVerifying, isSuccess, data, error } = usePaymentVerify({
+    gateway: 'zibal',
+    autoVerify: true,  // Automatically verifies from URL params
+    onSuccess: (data) => {
+      console.log('Payment verified!', data);
+    },
+  });
+
+  if (isVerifying) return <div>در حال بررسی...</div>;
+  if (isSuccess) return <div>پرداخت موفق! کد پیگیری: {data?.refNumber}</div>;
+  return <div>پرداخت ناموفق</div>;
+}
+```
+
+### File Structure
+
+```
+src/
+├── lib/payment/
+│   ├── index.ts      # Main exports
+│   ├── types.ts      # TypeScript types
+│   ├── gateways.ts   # Gateway configurations
+│   └── service.ts    # API service layer
+├── components/payment/
+│   ├── PaymentButton.tsx   # Simple pay button
+│   ├── PaymentCard.tsx     # Full payment form
+│   ├── PaymentStatus.tsx   # Status display
+│   └── PaymentCallback.tsx # Callback handler
+├── hooks/
+│   ├── use-payment.ts        # Payment creation hook
+│   └── use-payment-verify.ts # Verification hook
+└── pages/payment/
+    └── callback.tsx          # Callback page
+```
+
+### Environment Variables
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co/functions/v1/proxy/PROJECT_ID
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+```
+
+### Amount Conversion
+
+- Iranian gateways use **Rials** (not Tomans)
+- Use `tomansToRials(10000)` → `100000` Rials
+- Use `rialsToTomans(100000)` → `10000` Tomans
+- Use `formatAmount(100000, 'IRR')` → `"۱۰,۰۰۰ تومان"`
