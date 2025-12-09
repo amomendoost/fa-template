@@ -1,7 +1,7 @@
 // Payment Service Layer
 // All API calls to the payment proxy go through here
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { getGateway } from './gateways';
 import type {
   PaymentGateway,
@@ -13,11 +13,18 @@ import type {
 
 // Get the base URL for API calls
 function getBaseUrl(): string {
-  return import.meta.env.VITE_SUPABASE_URL || '';
+  const url = import.meta.env.VITE_SUPABASE_URL || '';
+  if (!url) {
+    console.error('VITE_SUPABASE_URL not configured');
+  }
+  return url;
 }
 
 // Get auth token for API calls
 async function getAuthToken(): Promise<string | null> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return null;
+  }
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
 }

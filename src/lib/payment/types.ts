@@ -91,7 +91,7 @@ export interface PaymentVerifyResponse {
 // ============================================
 
 export interface PaymentButtonProps {
-  /** Payment gateway to use */
+  /** Payment gateway to use (required - set by agent) */
   gateway: PaymentGateway;
   /** Amount to charge */
   amount: number;
@@ -115,6 +115,29 @@ export interface PaymentButtonProps {
   disabled?: boolean;
   /** Show loading state */
   loading?: boolean;
+}
+
+export interface PaymentCardProps {
+  /** Payment gateway (required - set by agent) */
+  gateway: PaymentGateway;
+  /** Pre-filled amount (in Tomans for Iranian, USD for international) */
+  defaultAmount?: number;
+  /** Fixed amount (user cannot change) */
+  fixedAmount?: number;
+  /** Payment description */
+  description?: string;
+  /** Order ID */
+  orderId?: string;
+  /** Called on successful payment creation */
+  onPaymentCreated?: (response: PaymentResponse) => void;
+  /** Called on error */
+  onError?: (error: string) => void;
+  /** Card title */
+  title?: string;
+  /** Show gateway name badge */
+  showGateway?: boolean;
+  /** Additional className */
+  className?: string;
 }
 
 export interface PaymentStatusProps {

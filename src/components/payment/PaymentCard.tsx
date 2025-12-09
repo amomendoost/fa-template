@@ -1,41 +1,24 @@
 // PaymentCard Component
-// Complete payment form with amount input and gateway selection
+// Payment form - gateway is set by agent, user just pays
 
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2, CreditCard, Wallet } from 'lucide-react';
 import { usePayment } from '@/hooks/use-payment';
-import {
-  GATEWAYS,
-  getIranianGateways,
-  getInternationalGateways,
-  formatAmount,
-  tomansToRials,
-} from '@/lib/payment/gateways';
+import { GATEWAYS, formatAmount, tomansToRials } from '@/lib/payment/gateways';
 import type { PaymentGateway, PaymentResponse } from '@/lib/payment/types';
 import { cn } from '@/lib/utils';
 
 interface PaymentCardProps {
-  /** Pre-selected gateway */
-  defaultGateway?: PaymentGateway;
+  /** Payment gateway (required - set by agent) */
+  gateway: PaymentGateway;
   /** Pre-filled amount (in Tomans for Iranian, USD for international) */
   defaultAmount?: number;
   /** Fixed amount (user cannot change) */
   fixedAmount?: number;
-  /** Fixed gateway (user cannot change) */
-  fixedGateway?: PaymentGateway;
-  /** Show only Iranian or international gateways */
-  gatewayType?: 'iranian' | 'international' | 'all';
   /** Payment description */
   description?: string;
   /** Order ID */
@@ -46,47 +29,37 @@ interface PaymentCardProps {
   onError?: (error: string) => void;
   /** Card title */
   title?: string;
+  /** Show gateway name badge */
+  showGateway?: boolean;
   /** Additional className */
   className?: string;
 }
 
 export function PaymentCard({
-  defaultGateway = 'zibal',
+  gateway,
   defaultAmount,
   fixedAmount,
-  fixedGateway,
-  gatewayType = 'all',
   description = 'پرداخت آنلاین',
   orderId,
   onPaymentCreated,
   onError,
   title = 'پرداخت آنلاین',
+  showGateway = false,
   className,
 }: PaymentCardProps) {
-  const [selectedGateway, setSelectedGateway] = useState<PaymentGateway>(
-    fixedGateway || defaultGateway
-  );
   const [amount, setAmount] = useState<string>(
     (fixedAmount || defaultAmount || '').toString()
   );
 
   const { createPayment, isLoading, error } = usePayment({
-    gateway: selectedGateway,
+    gateway,
     autoRedirect: true,
     onSuccess: onPaymentCreated,
     onError,
   });
 
-  // Get available gateways based on type
-  const availableGateways =
-    gatewayType === 'iranian'
-      ? getIranianGateways()
-      : gatewayType === 'international'
-      ? getInternationalGateways()
-      : Object.values(GATEWAYS);
-
-  const currentGatewayConfig = GATEWAYS[selectedGateway];
-  const isIranian = !currentGatewayConfig.isInternational;
+  const gatewayConfig = GATEWAYS[gateway];
+  const isIranian = !gatewayConfig.isInternational;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +83,7 @@ export function PaymentCard({
   const displayAmount = amount
     ? formatAmount(
         isIranian ? tomansToRials(parseFloat(amount) || 0) : parseFloat(amount) || 0,
-        currentGatewayConfig.defaultCurrency
+        gatewayConfig.defaultCurrency
       )
     : '';
 
@@ -125,35 +98,12 @@ export function PaymentCard({
 
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {/* Gateway Selection */}
-          {!fixedGateway && availableGateways.length > 1 && (
-            <div className="space-y-2">
-              <Label htmlFor="gateway">درگاه پرداخت</Label>
-              <Select
-                value={selectedGateway}
-                onValueChange={(v) => setSelectedGateway(v as PaymentGateway)}
-                disabled={isLoading}
-              >
-                <SelectTrigger id="gateway">
-                  <SelectValue placeholder="انتخاب درگاه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableGateways.map((gw) => (
-                    <SelectItem key={gw.id} value={gw.id}>
-                      {gw.nameFa} ({gw.name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Fixed Gateway Display */}
-          {fixedGateway && (
+          {/* Gateway Badge (optional) */}
+          {showGateway && (
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <CreditCard className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">
-                {currentGatewayConfig.nameFa} ({currentGatewayConfig.name})
+                {gatewayConfig.nameFa}
               </span>
             </div>
           )}
@@ -161,23 +111,23 @@ export function PaymentCard({
           {/* Amount Input */}
           <div className="space-y-2">
             <Label htmlFor="amount">
-              مبلغ ({isIranian ? 'تومان' : currentGatewayConfig.defaultCurrency})
+              مبلغ ({isIranian ? 'تومان' : gatewayConfig.defaultCurrency})
             </Label>
             <Input
               id="amount"
               type="number"
               placeholder={`حداقل ${
                 isIranian
-                  ? currentGatewayConfig.minAmount / 10
-                  : currentGatewayConfig.minAmount
+                  ? gatewayConfig.minAmount / 10
+                  : gatewayConfig.minAmount
               }`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               disabled={isLoading || fixedAmount !== undefined}
               min={
                 isIranian
-                  ? currentGatewayConfig.minAmount / 10
-                  : currentGatewayConfig.minAmount
+                  ? gatewayConfig.minAmount / 10
+                  : gatewayConfig.minAmount
               }
               dir="ltr"
               className="text-left"
