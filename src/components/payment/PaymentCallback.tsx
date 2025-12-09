@@ -36,7 +36,7 @@ export function PaymentCallback({
     if (failureRedirect) {
       navigate(failureRedirect);
     } else {
-      navigate(-1); // Go back
+      navigate(-1);
     }
   };
 
@@ -46,16 +46,20 @@ export function PaymentCallback({
     }
   };
 
+  // Extract data from response
+  const refNumber = data?.data?.refNumber || data?.data?.ref_id || data?.data?.Shaparak_Ref_Id;
+  const cardNumber = data?.data?.cardNumber || data?.data?.card_pan || data?.data?.card_number;
+  const amount = data?.data?.amount;
+
   return (
-    <div className="min-h-[400px] flex items-center justify-center p-4">
-      <PaymentStatus
-        status={status}
-        refNumber={data?.data?.refNumber || data?.data?.ref_id}
-        amount={data?.data?.amount}
-        onRetry={handleRetry}
-        onSuccess={successRedirect ? handleSuccess : undefined}
-      />
-    </div>
+    <PaymentStatus
+      status={status}
+      refNumber={refNumber}
+      cardNumber={cardNumber}
+      amount={amount}
+      onRetry={handleRetry}
+      onSuccess={successRedirect ? handleSuccess : undefined}
+    />
   );
 }
 
