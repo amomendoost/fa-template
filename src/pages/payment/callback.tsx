@@ -6,14 +6,31 @@ import { PaymentCallback } from '@/components/payment';
 import { isValidGateway } from '@/lib/payment';
 import type { PaymentGateway } from '@/lib/payment';
 
+// Auto-detect gateway from URL params
+function detectGatewayFromParams(params: URLSearchParams): PaymentGateway {
+  // Explicit gateway param takes priority
+  const explicit = params.get('gateway');
+  if (explicit && isValidGateway(explicit)) {
+    return explicit;
+  }
+
+  // Auto-detect from callback params
+  if (params.has('Authority')) return 'zarinpal';  // ZarinPal sends Authority
+  if (params.has('trackId')) return 'zibal';       // Zibal sends trackId
+  if (params.has('id') && params.has('order_id')) return 'idpay';  // IDPay
+  if (params.has('trans_id')) return 'nextpay';    // NextPay
+  if (params.has('ref_num')) return 'paystar';     // PayStar
+  if (params.has('session_id')) return 'stripe';   // Stripe
+
+  // Default fallback
+  return 'zibal';
+}
+
 export default function PaymentCallbackPage() {
   const [searchParams] = useSearchParams();
 
-  // Get gateway from URL params
-  const gatewayParam = searchParams.get('gateway') || 'zibal';
-  const gateway: PaymentGateway = isValidGateway(gatewayParam)
-    ? gatewayParam
-    : 'zibal';
+  // Auto-detect gateway from URL params
+  const gateway = detectGatewayFromParams(searchParams);
 
   return (
     <div
