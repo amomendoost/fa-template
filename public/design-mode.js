@@ -120,21 +120,22 @@
 
       for (let i = 0; i < el.childNodes.length; i++) {
         const node = el.childNodes[i];
-        // Check if node is an ELEMENT_NODE (nodeType === 1)
         if (node.nodeType === 1) {
           hasChildElements = true;
         }
-        // Only include TEXT_NODE (nodeType === 3)
         if (node.nodeType === 3) {
           directText += node.textContent;
         }
       }
 
-      // If element has child elements, don't return any text
-      // (it's a container, not a text element)
+      const trimmed = directText.trim();
+      // Return direct text nodes even when child elements exist (mixed content)
+      // e.g., <p>Hello <strong>World</strong></p> → text = "Hello"
+      // Only return empty text for pure containers with no direct text
       return {
-        text: hasChildElements ? '' : directText.trim(),
-        hasChildElements: hasChildElements
+        text: trimmed,
+        hasChildElements: hasChildElements,
+        hasMixedContent: hasChildElements && trimmed.length > 0
       };
     };
 
@@ -170,6 +171,7 @@
       textContent: textInfo.text,
       originalTextContent: textInfo.text, // Keep original for matching during save
       hasChildElements: textInfo.hasChildElements,
+      hasMixedContent: textInfo.hasMixedContent || false,
       computedStyles: {},
     };
 
