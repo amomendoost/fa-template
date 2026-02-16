@@ -12,7 +12,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100" dir="rtl">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">۴۰۴</h1>
         <p className="text-xl text-gray-600 mb-4">اوه! صفحه پیدا نشد</p>
