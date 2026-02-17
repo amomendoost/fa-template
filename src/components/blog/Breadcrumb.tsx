@@ -1,7 +1,6 @@
 // Breadcrumb - navigation breadcrumb with JSON-LD schema
 import { Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
 import { cn } from '@/lib/utils';
 
 interface BreadcrumbItem {
@@ -28,9 +27,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 
   return (
     <>
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
+      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       <nav className={cn('flex items-center gap-1 text-sm text-muted-foreground flex-wrap', className)}>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

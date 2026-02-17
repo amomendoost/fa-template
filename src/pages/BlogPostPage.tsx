@@ -1,6 +1,5 @@
 // BlogPostPage - single post with SEO, TOC, reading progress, related posts
 import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight } from 'lucide-react';
@@ -52,7 +51,7 @@ export default function BlogPostPage() {
       <ReadingProgress />
 
       {post && (
-        <Helmet>
+        <>
           <title>{post.seo_title || post.title}</title>
           <meta name="description" content={post.seo_description || post.excerpt || ''} />
           {post.meta_keywords?.length && (
@@ -69,7 +68,7 @@ export default function BlogPostPage() {
           {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
           <link rel="canonical" href={pageUrl} />
           {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
-        </Helmet>
+        </>
       )}
 
       <BlogHeader />

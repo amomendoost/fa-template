@@ -1,7 +1,6 @@
 // ShopPage - shop page: CategoryFilter + SortSelect + PriceRangeFilter + ProductGrid + CartDrawer
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search } from 'lucide-react';
@@ -36,10 +35,8 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <Helmet>
-        <title>فروشگاه</title>
-        <meta name="description" content="فروشگاه آنلاین - مشاهده و خرید محصولات" />
-      </Helmet>
+      <title>فروشگاه</title>
+      <meta name="description" content="فروشگاه آنلاین - مشاهده و خرید محصولات" />
 
       <div className="container mx-auto px-4 py-8 space-y-6">
         {/* Breadcrumb */}

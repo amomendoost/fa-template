@@ -1,6 +1,5 @@
 // ProductPage - single product page with SEO, breadcrumb, sharing, related, reviews
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Separator } from '@/components/ui/separator';
 import { ProductDetail } from '@/components/shop/ProductDetail';
 import { RelatedProducts } from '@/components/shop/RelatedProducts';
@@ -51,7 +50,7 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {product && (
-        <Helmet>
+        <>
           <title>{pageTitle}</title>
           <meta name="description" content={pageDesc} />
           {product.meta_keywords?.length && (
@@ -69,7 +68,7 @@ export default function ProductPage() {
           {jsonLd && (
             <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
           )}
-        </Helmet>
+        </>
       )}
 
       <div className="container mx-auto px-4 py-8 space-y-8">

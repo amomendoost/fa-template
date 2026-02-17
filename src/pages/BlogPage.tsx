@@ -1,7 +1,6 @@
 // BlogPage - blog listing with search, categories, and SEO
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { BlogHeader } from '@/components/blog/BlogHeader';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogSearch } from '@/components/blog/BlogSearch';
@@ -50,10 +49,8 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <Helmet>
-        <title>بلاگ</title>
-        <meta name="description" content="آخرین مطالب و مقالات" />
-      </Helmet>
+      <title>بلاگ</title>
+      <meta name="description" content="آخرین مطالب و مقالات" />
 
       <BlogHeader showSearch onSearch={setSearch} searchValue={search} />
 
