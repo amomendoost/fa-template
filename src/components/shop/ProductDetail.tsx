@@ -8,6 +8,7 @@ import { ShoppingCart, Minus, Plus, ZoomIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProduct } from '@/hooks/use-product';
 import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 import { sanitizeHtml } from '@/lib/blog/sanitize';
 import { PriceTag } from './PriceTag';
 import { ImageLightbox } from './ImageLightbox';
@@ -26,6 +27,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
   const { product: fetchedProduct, isLoading, error } = useProduct(externalProduct ? undefined : slug);
   const product = externalProduct ?? fetchedProduct;
   const { addItem } = useCart();
+  const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>();
@@ -66,6 +68,10 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
   const handleAdd = () => {
     addItem(product, quantity, selectedVariant);
     onAddToCart?.(product);
+    toast({
+      title: 'به سبد خرید اضافه شد',
+      description: `${quantity.toLocaleString('fa-IR')} عدد ${product.name}`,
+    });
   };
 
   return (

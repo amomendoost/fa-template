@@ -87,8 +87,8 @@ export default function BlogPostPage() {
           </Button>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="min-w-0 space-y-8">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]" dir="ltr">
+          <div className="min-w-0 space-y-8" dir="rtl">
             <PostDetail slug={slug} />
 
             {post && (
@@ -106,7 +106,7 @@ export default function BlogPostPage() {
           </div>
 
           {post && (
-            <aside className="hidden lg:block">
+            <aside className="hidden lg:block" dir="rtl">
               <div className="sticky top-20 space-y-3">
                 {headings.length > 0 ? (
                   <TableOfContents headings={headings} activeId={activeId} />

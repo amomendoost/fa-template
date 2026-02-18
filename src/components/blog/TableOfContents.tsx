@@ -24,7 +24,7 @@ export function TableOfContents({ headings, activeId, className }: TableOfConten
   };
 
   return (
-    <nav className={cn('rounded-lg border bg-card p-4', className)}>
+    <nav className={cn('rounded-lg border bg-card p-4 text-right', className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full text-sm font-bold gap-2"
@@ -44,7 +44,7 @@ export function TableOfContents({ headings, activeId, className }: TableOfConten
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  'w-full justify-start text-sm font-normal h-auto py-1.5 px-2',
+                  'w-full justify-end text-right text-sm font-normal h-auto py-1.5 px-2',
                   heading.level >= 3 && 'pr-6',
                   heading.level === 4 && 'pr-10',
                   activeId === heading.id
