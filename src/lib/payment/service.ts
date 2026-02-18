@@ -20,6 +20,11 @@ function getBaseUrl(): string {
   return url;
 }
 
+// Public project key required for guest integration calls
+function getProjectApiKey(): string | null {
+  return import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || null;
+}
+
 // Get auth token for API calls
 async function getAuthToken(): Promise<string | null> {
   if (!isSupabaseConfigured() || !supabase) {
@@ -39,6 +44,7 @@ export async function createPayment(
 ): Promise<PaymentResponse> {
   const baseUrl = getBaseUrl();
   const token = await getAuthToken();
+  const projectApiKey = getProjectApiKey();
   const config = getGateway(gateway);
 
   // Build callback URL if not provided
@@ -83,6 +89,7 @@ export async function createPayment(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(projectApiKey && { 'x-project-api-key': projectApiKey }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify(body),
@@ -124,6 +131,7 @@ export async function verifyPayment(
 ): Promise<PaymentVerifyResponse> {
   const baseUrl = getBaseUrl();
   const token = await getAuthToken();
+  const projectApiKey = getProjectApiKey();
   const config = getGateway(gateway);
 
   try {
@@ -133,6 +141,7 @@ export async function verifyPayment(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(projectApiKey && { 'x-project-api-key': projectApiKey }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({
