@@ -1,16 +1,13 @@
-// ProductPage - single product page with SEO, breadcrumb, sharing, related, reviews
+// ProductPage - single product page with SEO, breadcrumb, related products
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { ShoppingCart } from 'lucide-react';
 import { ProductDetail } from '@/components/shop/ProductDetail';
 import { RelatedProducts } from '@/components/shop/RelatedProducts';
-import { ProductReviews } from '@/components/shop/ProductReviews';
 import { CartDrawer } from '@/components/shop/CartDrawer';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogHeader } from '@/components/blog/BlogHeader';
-import { ShareBar } from '@/components/blog/ShareBar';
 import { useProduct } from '@/hooks/use-product';
 import { useCart } from '@/hooks/use-cart';
 
@@ -82,39 +79,31 @@ export default function ProductPage() {
 
       <BlogHeader />
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        <Breadcrumb items={breadcrumbItems} />
-
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-xl sm:text-2xl font-bold">{product?.name || 'جزئیات محصول'}</h1>
-          <Button variant="outline" className="gap-2 relative" onClick={() => setCartOpen(true)}>
+      <main className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="flex items-center justify-between gap-4 mb-10">
+          <Breadcrumb items={breadcrumbItems} />
+          <Button variant="ghost" size="sm" className="gap-2 relative shrink-0" onClick={() => setCartOpen(true)}>
             <ShoppingCart className="h-4 w-4" />
-            سبد خرید
             {count > 0 && (
-              <span className="absolute -top-2 -left-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -left-1 bg-foreground text-background text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {count}
               </span>
             )}
           </Button>
         </div>
 
-        <ProductDetail
-          slug={slug}
-          onAddToCart={() => setCartOpen(true)}
-        />
+        <div className="space-y-16">
+          <ProductDetail
+            slug={slug}
+            onAddToCart={() => setCartOpen(true)}
+          />
 
-        {product && (
-          <ShareBar url={pageUrl} title={product.name} />
-        )}
+          {slug && <RelatedProducts slug={slug} />}
+        </div>
+      </main>
 
-        <Separator />
-
-        {slug && <RelatedProducts slug={slug} />}
-
-        <Separator />
-
-        {slug && <ProductReviews slug={slug} />}
-      </div>
+      {/* Extra bottom padding for mobile sticky bar */}
+      <div className="h-20 lg:hidden" />
 
       <CartDrawer
         open={cartOpen}
