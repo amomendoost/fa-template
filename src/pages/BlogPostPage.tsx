@@ -73,7 +73,7 @@ export default function BlogPostPage() {
 
       <BlogHeader />
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto max-w-7xl px-4 py-6">
         <div className="space-y-4 mb-6">
           <Breadcrumb items={breadcrumbItems} />
           <Button
@@ -87,8 +87,8 @@ export default function BlogPostPage() {
           </Button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 max-w-3xl space-y-8">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div className="min-w-0 space-y-8">
             <PostDetail slug={slug} />
 
             {post && (
@@ -105,10 +105,16 @@ export default function BlogPostPage() {
             )}
           </div>
 
-          {headings.length > 0 && (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-20">
-                <TableOfContents headings={headings} activeId={activeId} />
+          {post && (
+            <aside className="hidden lg:block">
+              <div className="sticky top-20 space-y-3">
+                {headings.length > 0 ? (
+                  <TableOfContents headings={headings} activeId={activeId} />
+                ) : (
+                  <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+                    برای نمایش فهرست مطالب، در محتوای بلاگ از هدینگ‌های `h2` تا `h4` استفاده کنید.
+                  </div>
+                )}
               </div>
             </aside>
           )}

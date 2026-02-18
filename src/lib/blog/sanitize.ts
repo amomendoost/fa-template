@@ -23,7 +23,7 @@ export function sanitizeHtml(html: string): string {
 
 export function addHeadingIds(html: string): string {
   let counter = 0;
-  return html.replace(/<(h[2-3])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => {
+  return html.replace(/<(h[2-4])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => {
     const text = content.replace(/<[^>]*>/g, '').trim();
     const id = `heading-${counter++}`;
     if (attrs.includes('id=')) return match;

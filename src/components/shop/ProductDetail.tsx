@@ -8,6 +8,7 @@ import { ShoppingCart, Minus, Plus, ZoomIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProduct } from '@/hooks/use-product';
 import { useCart } from '@/hooks/use-cart';
+import { sanitizeHtml } from '@/lib/blog/sanitize';
 import { PriceTag } from './PriceTag';
 import { ImageLightbox } from './ImageLightbox';
 import { WishlistButton } from './WishlistButton';
@@ -55,6 +56,12 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
 
   const outOfStock = product.stock <= 0;
   const images = product.images?.length ? product.images : [];
+  const hasDescriptionHtml = /<\/?[a-z][\s\S]*>/i.test(product.description || '');
+  const descriptionHtml = product.description
+    ? hasDescriptionHtml
+      ? sanitizeHtml(product.description)
+      : product.description.replace(/\n/g, '<br />')
+    : '';
 
   const handleAdd = () => {
     addItem(product, quantity, selectedVariant);
@@ -62,11 +69,11 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
   };
 
   return (
-    <div className={cn('grid md:grid-cols-2 gap-8', className)}>
+    <div className={cn('grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-8 lg:gap-10', className)}>
       {/* Image Gallery */}
       <div className="space-y-3">
         <div
-          className="aspect-square bg-muted rounded-lg overflow-hidden relative cursor-zoom-in group/img"
+          className="h-[260px] sm:h-[360px] lg:h-[500px] bg-muted/30 rounded-xl border overflow-hidden relative cursor-zoom-in group/img"
           onClick={() => images.length > 0 && setLightboxOpen(true)}
         >
           {images.length > 0 ? (
@@ -74,7 +81,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
               <img
                 src={images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain p-2 sm:p-4"
               />
               <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 transition-colors flex items-center justify-center">
                 <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover/img:opacity-70 transition-opacity" />
@@ -93,7 +100,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
                 key={i}
                 onClick={() => setSelectedImage(i)}
                 className={cn(
-                  'w-16 h-16 rounded-md overflow-hidden border-2 shrink-0 transition-colors',
+                  'w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] rounded-md overflow-hidden border-2 shrink-0 transition-colors',
                   i === selectedImage ? 'border-primary' : 'border-transparent'
                 )}
               >
@@ -112,7 +119,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
       </div>
 
       {/* Info */}
-      <div className="space-y-4">
+      <div className="space-y-5 rounded-xl border bg-card p-5 sm:p-6 self-start lg:sticky lg:top-20">
         <div>
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-2xl font-bold">{product.name}</h1>
@@ -140,10 +147,11 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
 
         <Separator />
 
-        {product.description && (
-          <p className="text-muted-foreground leading-7 whitespace-pre-line">
-            {product.description}
-          </p>
+        {descriptionHtml && (
+          <div
+            className="prose prose-sm sm:prose-base max-w-none dark:prose-invert text-muted-foreground leading-7"
+            dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+          />
         )}
 
         {/* Variants */}
@@ -224,4 +232,3 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
 }
 
 export default ProductDetail;
-

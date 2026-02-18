@@ -13,7 +13,7 @@ export function useTableOfContents(html?: string) {
   const headings = useMemo(() => {
     if (!html) return [];
     const result: TocHeading[] = [];
-    const regex = /<(h[2-3])[^>]*id="([^"]*)"[^>]*>(.*?)<\/\1>/gi;
+    const regex = /<(h[2-4])[^>]*id="([^"]*)"[^>]*>(.*?)<\/\1>/gi;
     let match;
     while ((match = regex.exec(html)) !== null) {
       const level = parseInt(match[1][1]);

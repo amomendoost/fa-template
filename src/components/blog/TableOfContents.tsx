@@ -45,7 +45,8 @@ export function TableOfContents({ headings, activeId, className }: TableOfConten
                 size="sm"
                 className={cn(
                   'w-full justify-start text-sm font-normal h-auto py-1.5 px-2',
-                  heading.level === 3 && 'pr-6',
+                  heading.level >= 3 && 'pr-6',
+                  heading.level === 4 && 'pr-10',
                   activeId === heading.id
                     ? 'text-primary bg-primary/10 font-medium'
                     : 'text-muted-foreground hover:text-foreground'

@@ -59,16 +59,21 @@ export function PostDetail({ slug, post: externalPost, className }: PostDetailPr
   );
 
   return (
-    <article className={cn('max-w-3xl mx-auto space-y-6', className)}>
+    <article className={cn('space-y-6', className)}>
       {post.cover_image && (
-        <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-          <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
+        <div className="rounded-xl border bg-muted/30 overflow-hidden">
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            className="w-full h-[220px] sm:h-[320px] lg:h-[420px] object-contain bg-background/80"
+            loading="lazy"
+          />
         </div>
       )}
 
       <div className="space-y-3">
         {post.category && <Badge variant="secondary">{post.category}</Badge>}
-        <h1 className="text-3xl font-bold leading-tight">{post.title}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">{post.title}</h1>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
           {post.published_at && (
@@ -96,7 +101,7 @@ export function PostDetail({ slug, post: externalPost, className }: PostDetailPr
 
       {/* Render sanitized HTML content */}
       <div
-        className="prose prose-lg max-w-none dark:prose-invert leading-8"
+        className="prose prose-lg max-w-none dark:prose-invert leading-8 prose-img:mx-auto prose-img:rounded-lg prose-pre:rounded-lg"
         dangerouslySetInnerHTML={{ __html: lazyContent }}
       />
 
