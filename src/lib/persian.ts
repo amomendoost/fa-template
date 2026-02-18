@@ -25,6 +25,9 @@ export function formatPersianNumber(num: number): string {
   return toPersianDigits(num.toLocaleString("en-US"));
 }
 
+// Backward-compatible alias used by some generated components
+export const toPersianNumber = formatPersianNumber;
+
 // ============================================
 // Date Formatting (Jalali)
 // ============================================
