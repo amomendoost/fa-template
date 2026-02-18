@@ -109,6 +109,19 @@ Over 40 pre-built components available in `src/components/ui/`:
 - Import UI components from `@/components/ui/`
 - Use the toast system via `use-toast` hook for notifications
 
+#### Icon Import Safety (lucide-react)
+- Do not assume icon names exist in `lucide-react`; verify exports before importing.
+- Preferred check before adding/changing an icon import:
+  - `rg -n "export \\{.*<IconName>" node_modules/lucide-react/dist/esm/lucide-react.js`
+- If an icon is not exported, use one of these fallbacks:
+  - Replace with a close Lucide icon (for example `Send`, `SendHorizontal`, `MessageCircle`).
+  - Use inline SVG for brand logos (Telegram, X, LinkedIn, etc.) when exact branding is needed.
+  - Use `react-icons` only if the project already depends on it or there is a clear need.
+- Common build failure pattern to avoid:
+  - `"X is not exported by lucide-react"` means the import name is invalid for the installed version.
+- Before finishing icon-related edits, run:
+  - `npm run build`
+
 #### Cursor Rules Integration
 This project includes comprehensive Cursor rules in `.cursor/rules/` that auto-apply based on file context:
 - **Core Rules** (`core.mdc`) - Always active architecture and quality rules
