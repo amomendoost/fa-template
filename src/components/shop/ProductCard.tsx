@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,7 @@ export function ProductCard({
   showAddToCart = true,
   className,
 }: ProductCardProps) {
+  const navigate = useNavigate();
   const { addItem } = useCart();
   const { toast } = useToast();
   const image = product.images?.[0];
@@ -39,13 +41,25 @@ export function ProductCard({
     });
   };
 
+  const handleReadMore = () => {
+    if (onReadMore) {
+      onReadMore(product);
+      return;
+    }
+    if (product.slug) {
+      navigate(`/shop/${encodeURIComponent(product.slug)}`);
+      return;
+    }
+    navigate('/shop');
+  };
+
   return (
     <Card
       className={cn(
         'overflow-hidden transition-shadow hover:shadow-lg cursor-pointer group',
         className
       )}
-      onClick={() => onReadMore?.(product)}
+      onClick={handleReadMore}
     >
       <div className="aspect-square bg-muted relative overflow-hidden">
         {image ? (
