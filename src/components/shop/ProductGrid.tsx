@@ -1,6 +1,7 @@
 // ProductGrid - responsive grid of products + loading + empty state
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from './ProductCard';
@@ -19,8 +20,8 @@ interface ProductGridProps {
 }
 
 const gridCols = {
-  2: 'grid-cols-1 sm:grid-cols-2',
-  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  2: 'grid-cols-2',
+  3: 'grid-cols-2 lg:grid-cols-3',
   4: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
 };
 
@@ -43,10 +44,11 @@ export function ProductGrid({
 
   if (isLoading && products.length === 0) {
     return (
-      <div className={cn('grid gap-4', gridCols[columns], className)}>
+      <div className={cn('grid gap-5', gridCols[columns], className)}>
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="space-y-3">
-            <Skeleton className="aspect-square w-full rounded-lg" />
+            <Skeleton className="aspect-square w-full rounded-2xl" />
+            <Skeleton className="h-3 w-16 rounded-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
           </div>
@@ -57,15 +59,16 @@ export function ProductGrid({
 
   if (products.length === 0) {
     return (
-      <div className={cn('text-center py-12 text-muted-foreground', className)}>
-        محصولی یافت نشد
+      <div className={cn('flex flex-col items-center justify-center py-20 text-muted-foreground gap-3', className)}>
+        <Package className="h-12 w-12 opacity-20" />
+        <p className="text-sm">محصولی یافت نشد</p>
       </div>
     );
   }
 
   return (
-    <div className={cn('space-y-6', className)}>
-      <div className={cn('grid gap-4', gridCols[columns])}>
+    <div className={cn('space-y-8', className)}>
+      <div className={cn('grid gap-5', gridCols[columns])}>
         {products.map((product) => (
           <ProductCard
             key={product.id}
@@ -76,7 +79,7 @@ export function ProductGrid({
       </div>
       {!externalProducts && pagination.hasMore && (
         <div className="flex justify-center">
-          <Button variant="outline" onClick={loadMore}>
+          <Button variant="outline" className="rounded-full px-8" onClick={loadMore}>
             نمایش بیشتر
           </Button>
         </div>

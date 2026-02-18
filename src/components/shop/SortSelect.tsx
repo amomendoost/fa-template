@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const SORT_OPTIONS = [
@@ -25,8 +26,11 @@ interface SortSelectProps {
 export function SortSelect({ value = 'default', onChange, className }: SortSelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={cn('w-[160px]', className)}>
-        <SelectValue placeholder="مرتب‌سازی" />
+      <SelectTrigger className={cn('w-[150px] h-9 rounded-full text-sm border-0 bg-muted/60', className)}>
+        <div className="flex items-center gap-1.5">
+          <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+          <SelectValue placeholder="مرتب‌سازی" />
+        </div>
       </SelectTrigger>
       <SelectContent>
         {SORT_OPTIONS.map((opt) => (

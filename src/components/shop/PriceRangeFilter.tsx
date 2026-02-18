@@ -1,19 +1,18 @@
-// PriceRangeFilter - min/max price inputs
+// PriceRangeFilter - min/max price inputs (horizontal or vertical)
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PriceRangeFilterProps {
   minPrice?: number;
   maxPrice?: number;
   onChange: (range: { min?: number; max?: number }) => void;
+  layout?: 'horizontal' | 'vertical';
   className?: string;
 }
 
-export function PriceRangeFilter({ minPrice, maxPrice, onChange, className }: PriceRangeFilterProps) {
+export function PriceRangeFilter({ minPrice, maxPrice, onChange, layout = 'horizontal', className }: PriceRangeFilterProps) {
   const [min, setMin] = useState(minPrice?.toString() || '');
   const [max, setMax] = useState(maxPrice?.toString() || '');
 
@@ -32,38 +31,71 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange, className }: Pr
 
   const hasFilter = minPrice !== undefined || maxPrice !== undefined;
 
+  if (layout === 'vertical') {
+    return (
+      <div className={cn('space-y-3', className)}>
+        <div className="space-y-2">
+          <Input
+            type="number"
+            placeholder="از (تومان)"
+            value={min}
+            onChange={(e) => setMin(e.target.value)}
+            className="h-9 rounded-xl text-sm"
+            dir="ltr"
+          />
+          <Input
+            type="number"
+            placeholder="تا (تومان)"
+            value={max}
+            onChange={(e) => setMax(e.target.value)}
+            className="h-9 rounded-xl text-sm"
+            dir="ltr"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button size="sm" className="h-8 rounded-full flex-1" onClick={handleApply}>
+            اعمال
+          </Button>
+          {hasFilter && (
+            <Button size="sm" variant="ghost" className="h-8 rounded-full" onClick={handleClear}>
+              حذف
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={cn('flex items-end gap-2 flex-wrap', className)}>
-      <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">از (تومان)</Label>
+    <div className={cn('flex items-center gap-3 flex-wrap', className)}>
+      <span className="text-sm text-muted-foreground shrink-0">محدوده قیمت:</span>
+      <div className="flex items-center gap-2">
         <Input
           type="number"
-          placeholder="حداقل"
+          placeholder="از"
           value={min}
           onChange={(e) => setMin(e.target.value)}
-          className="w-28 h-9"
+          className="w-28 h-9 rounded-xl text-sm"
           dir="ltr"
         />
-      </div>
-      <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">تا (تومان)</Label>
+        <span className="text-muted-foreground/40">—</span>
         <Input
           type="number"
-          placeholder="حداکثر"
+          placeholder="تا"
           value={max}
           onChange={(e) => setMax(e.target.value)}
-          className="w-28 h-9"
+          className="w-28 h-9 rounded-xl text-sm"
           dir="ltr"
         />
+        <span className="text-xs text-muted-foreground">تومان</span>
       </div>
-      <Button size="sm" variant="outline" className="h-9 gap-1" onClick={handleApply}>
-        <Filter className="h-3.5 w-3.5" />
+      <Button size="sm" className="h-9 rounded-full" onClick={handleApply}>
         اعمال
       </Button>
       {hasFilter && (
-        <Button size="sm" variant="ghost" className="h-9" onClick={handleClear}>
-          حذف فیلتر
-        </Button>
+        <button onClick={handleClear} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+          حذف
+        </button>
       )}
     </div>
   );
