@@ -120,6 +120,40 @@ This project includes comprehensive Cursor rules in `.cursor/rules/` that auto-a
 
 Reference with `@rule-name` in prompts (e.g., `@quality` for quality checklist)
 
+## Icons - lucide-react
+
+This project uses **lucide-react** for icons. **Do NOT guess icon names.** Always verify before using.
+
+```tsx
+import { IconName } from "lucide-react";
+// Usage: <IconName className="h-4 w-4" />
+```
+
+### How to verify an icon exists
+Before using any icon, verify it exists by checking the installed package:
+```bash
+# Search for an icon by keyword (e.g. "cart", "user", "bell")
+ls node_modules/lucide-react/dist/esm/icons/ | grep -i "cart"
+```
+Icon filenames use kebab-case (`shopping-cart.js`), but imports use PascalCase (`ShoppingCart`).
+Conversion: `shopping-cart` → `ShoppingCart`, `arrow-up-right` → `ArrowUpRight`
+
+### Common mistakes to avoid
+- `LayoutDashboard` exists, NOT ~~`Dashboard`~~
+- `Settings` exists, NOT ~~`Gear`~~
+- `Trash2` exists, NOT ~~`DeleteIcon`~~
+- `Eye` / `EyeOff` exist, NOT ~~`Visibility`~~
+- `LogIn` / `LogOut` exist, NOT ~~`Login`~~ / ~~`Logout`~~
+- `MessageSquare` exists, NOT ~~`Chat`~~ or ~~`Comment`~~
+- `Bell` exists, NOT ~~`Notification`~~
+- `MapPin` exists, NOT ~~`Location`~~
+- `Pencil` exists, NOT ~~`EditIcon`~~
+- `TriangleAlert` exists, NOT ~~`Warning`~~
+- `Loader2` is the spinner, NOT ~~`Spinner`~~
+- `Send` exists, NOT ~~`PaperPlane`~~
+- `ShoppingCart` exists, NOT ~~`Cart`~~
+- `Smartphone` exists, NOT ~~`Mobile`~~
+
 ## Payment Infrastructure
 
 Built-in payment system supporting multiple Iranian and international gateways.
