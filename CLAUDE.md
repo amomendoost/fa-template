@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Development
 - `npm run dev` - Start development server on port 8080
-- `npm run build` - Create production build
+- `npm run build` - Run typecheck + create production build
 - `npm run build:dev` - Create development build
+- `npm run typecheck` - Run TypeScript type checking (catches missing JSX imports / undefined components)
 - `npm run lint` - Run ESLint linter
 - `npm run preview` - Preview production build locally
 
@@ -80,7 +81,7 @@ Over 40 pre-built components available in `src/components/ui/`:
 - Mobile-first responsive design approach
 - Premium, sophisticated visual hierarchy with purposeful color psychology
 - **Accessibility**: Maintain WCAG 2.1 AA contrast ratios (4.5:1 minimum)
-- **Never ship** without running `npm run lint` - must pass without errors
+- **Never ship** without running `npm run lint` and `npm run typecheck` - both must pass
 - **Industry-specific designs**: Adapt visual identity, emotional tone, and color psychology to target audience
 - **Design Philosophy**: Create unique, custom-crafted interfaces that feel premium and engaging
 - **Color Strategy**: Use colors intentionally to evoke the right emotions and enhance user experience
@@ -107,6 +108,8 @@ Over 40 pre-built components available in `src/components/ui/`:
 - Follow React Hook Form patterns with Zod validation for forms
 - Use TanStack Query for API state management
 - Import UI components from `@/components/ui/`
+- After adding any JSX component (`<Input />`, `<Dialog />`, etc.), verify the component is imported in the same file
+- Runtime pattern to avoid: `ReferenceError: X is not defined` usually means a missing import that Vite build alone may not catch
 - Use the toast system via `use-toast` hook for notifications
 
 #### Icon Import Safety (lucide-react)
