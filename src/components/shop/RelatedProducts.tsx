@@ -1,6 +1,5 @@
 // RelatedProducts - horizontal scroll carousel with snap
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,7 +14,6 @@ interface RelatedProductsProps {
 }
 
 export function RelatedProducts({ slug, className }: RelatedProductsProps) {
-  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -104,10 +102,7 @@ export function RelatedProducts({ slug, className }: RelatedProductsProps) {
       >
         {products.map((product) => (
           <div key={product.id} className="w-[200px] sm:w-[220px] shrink-0 snap-start">
-            <ProductCard
-              product={product}
-              onReadMore={(p) => navigate(`/shop/${p.slug}`)}
-            />
+            <ProductCard product={product} />
           </div>
         ))}
       </div>

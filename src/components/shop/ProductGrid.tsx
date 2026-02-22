@@ -5,17 +5,15 @@ import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from './ProductCard';
-import type { Product, ProductFilterParams } from '@/lib/shop/types';
+import type { ProductFilterParams } from '@/lib/shop/types';
 
 interface ProductGridProps {
-  products?: Product[];
   category?: string;
   search?: string;
   sort?: string;
   minPrice?: number;
   maxPrice?: number;
   columns?: 2 | 3 | 4;
-  onProductClick?: (product: Product) => void;
   className?: string;
 }
 
@@ -26,21 +24,16 @@ const gridCols = {
 };
 
 export function ProductGrid({
-  products: externalProducts,
   category,
   search,
   sort,
   minPrice,
   maxPrice,
   columns = 4,
-  onProductClick,
   className,
 }: ProductGridProps) {
-  const params: ProductFilterParams | undefined =
-    externalProducts === undefined ? { category, search, sort, min_price: minPrice, max_price: maxPrice } : undefined;
-  const { products: fetchedProducts, isLoading, pagination, loadMore } = useProducts(params);
-
-  const products = externalProducts ?? fetchedProducts;
+  const params: ProductFilterParams = { category, search, sort, min_price: minPrice, max_price: maxPrice };
+  const { products, isLoading, pagination, loadMore } = useProducts(params);
 
   if (isLoading && products.length === 0) {
     return (
@@ -73,11 +66,10 @@ export function ProductGrid({
           <ProductCard
             key={product.id}
             product={product}
-            onReadMore={onProductClick}
           />
         ))}
       </div>
-      {!externalProducts && pagination.hasMore && (
+      {pagination.hasMore && (
         <div className="flex justify-center">
           <Button variant="outline" className="rounded-full px-8" onClick={loadMore}>
             نمایش بیشتر

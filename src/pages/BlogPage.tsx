@@ -1,16 +1,15 @@
 // BlogPage - blog listing with search, categories, and SEO
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { BlogHeader } from '@/components/blog/BlogHeader';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogSearch } from '@/components/blog/BlogSearch';
 import { PostGrid } from '@/components/blog/PostGrid';
 import { CategoryList } from '@/components/blog/CategoryList';
 import { getCategories } from '@/lib/blog/service';
-import type { BlogCategory, BlogPost } from '@/lib/blog/types';
+import type { BlogCategory } from '@/lib/blog/types';
 
 export default function BlogPage() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [search, setSearch] = useState('');
@@ -31,10 +30,6 @@ export default function BlogPage() {
     }
     params.delete('tag');
     setSearchParams(params);
-  };
-
-  const handlePostClick = (post: BlogPost) => {
-    navigate(`/blog/${post.slug}`);
   };
 
   const breadcrumbItems = useMemo(() => {
@@ -88,7 +83,6 @@ export default function BlogPage() {
             <PostGrid
               category={category}
               tag={tag}
-              onPostClick={handlePostClick}
             />
           </div>
         </div>

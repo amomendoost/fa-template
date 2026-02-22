@@ -95,10 +95,7 @@ export default function BlogPostPage() {
               <>
                 <ShareBar url={pageUrl} title={post.title} />
                 <Separator />
-                <RelatedPosts
-                  slug={slug!}
-                  onPostClick={(p) => navigate(`/blog/${p.slug}`)}
-                />
+                <RelatedPosts slug={slug!} />
                 <Separator />
                 <CommentSection postId={post.id} comments={comments} />
               </>

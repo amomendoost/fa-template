@@ -11,7 +11,6 @@ interface PostGridProps {
   category?: string;
   tag?: string;
   columns?: 2 | 3;
-  onPostClick?: (post: BlogPost) => void;
   className?: string;
 }
 
@@ -25,7 +24,6 @@ export function PostGrid({
   category,
   tag,
   columns = 3,
-  onPostClick,
   className,
 }: PostGridProps) {
   const params: BlogFilterParams | undefined =
@@ -61,7 +59,7 @@ export function PostGrid({
     <div className={cn('space-y-6', className)}>
       <div className={cn('grid gap-6', gridCols[columns])}>
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onReadMore={onPostClick} />
+          <PostCard key={post.id} post={post} />
         ))}
       </div>
       {!externalPosts && pagination.hasMore && (
