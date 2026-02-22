@@ -8,7 +8,6 @@ import type { BlogPost } from '@/lib/blog/types';
 
 interface PostCardProps {
   post: BlogPost;
-  onReadMore?: (post: BlogPost) => void;
   showExcerpt?: boolean;
   className?: string;
 }
@@ -22,19 +21,11 @@ function formatDate(date?: string): string {
   });
 }
 
-export function PostCard({ post, onReadMore, showExcerpt = true, className }: PostCardProps) {
-  const href = post.slug ? `/blog/${encodeURIComponent(post.slug)}` : '/blog';
+export function PostCard({ post, showExcerpt = true, className }: PostCardProps) {
+  const href = post.slug ? `/blog/${post.slug}` : '/blog';
 
   return (
-    <Link
-      to={href}
-      className="block"
-      onClick={(e) => {
-        if (!onReadMore) return;
-        e.preventDefault();
-        onReadMore(post);
-      }}
-    >
+    <Link to={href} className="block">
       <Card
         className={cn(
           'overflow-hidden transition-shadow hover:shadow-lg cursor-pointer group',

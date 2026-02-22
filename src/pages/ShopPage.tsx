@@ -13,7 +13,7 @@ import { PriceRangeFilter } from '@/components/shop/PriceRangeFilter';
 import { CartDrawer } from '@/components/shop/CartDrawer';
 import { useCart } from '@/hooks/use-cart';
 import { getCategories } from '@/lib/shop/service';
-import type { ProductCategory, Product } from '@/lib/shop/types';
+import type { ProductCategory } from '@/lib/shop/types';
 
 export default function ShopPage() {
   const navigate = useNavigate();
@@ -29,10 +29,6 @@ export default function ShopPage() {
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
   }, []);
-
-  const handleProductClick = (product: Product) => {
-    navigate(`/shop/${product.slug}`);
-  };
 
   const hasActiveFilters = !!category || !!minPrice || !!maxPrice;
 
@@ -194,7 +190,6 @@ export default function ShopPage() {
               sort={sort}
               minPrice={minPrice}
               maxPrice={maxPrice}
-              onProductClick={handleProductClick}
             />
           </div>
         </div>

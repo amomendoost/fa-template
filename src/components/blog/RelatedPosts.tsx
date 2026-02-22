@@ -8,11 +8,10 @@ import type { BlogPost } from '@/lib/blog/types';
 
 interface RelatedPostsProps {
   slug: string;
-  onPostClick?: (post: BlogPost) => void;
   className?: string;
 }
 
-export function RelatedPosts({ slug, onPostClick, className }: RelatedPostsProps) {
+export function RelatedPosts({ slug, className }: RelatedPostsProps) {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,7 +45,7 @@ export function RelatedPosts({ slug, onPostClick, className }: RelatedPostsProps
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} onReadMore={onPostClick} showExcerpt={false} />
+            <PostCard key={post.id} post={post} showExcerpt={false} />
           ))}
         </div>
       )}

@@ -1,7 +1,7 @@
 // ProductCard - product card with image, name, price, add to cart
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Package } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +12,6 @@ import type { Product } from '@/lib/shop/types';
 interface ProductCardProps {
   product: Product;
   onAddToCart?: (product: Product) => void;
-  onReadMore?: (product: Product) => void;
   showAddToCart?: boolean;
   className?: string;
 }
@@ -20,11 +19,9 @@ interface ProductCardProps {
 export function ProductCard({
   product,
   onAddToCart,
-  onReadMore,
   showAddToCart = true,
   className,
 }: ProductCardProps) {
-  const navigate = useNavigate();
   const { addItem } = useCart();
   const { toast } = useToast();
   const image = product.images?.[0];
@@ -34,7 +31,11 @@ export function ProductCard({
     ? Math.round(((product.compare_price! - product.price) / product.compare_price!) * 100)
     : 0;
 
-  const handleAdd = () => {
+  const productUrl = `/shop/${product.slug}`;
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     addItem(product);
     onAddToCart?.(product);
     toast({
@@ -43,22 +44,10 @@ export function ProductCard({
     });
   };
 
-  const handleReadMore = () => {
-    if (onReadMore) {
-      onReadMore(product);
-      return;
-    }
-    if (product.slug) {
-      navigate(`/shop/${encodeURIComponent(product.slug)}`);
-      return;
-    }
-    navigate('/shop');
-  };
-
   return (
-    <div
-      className={cn('group cursor-pointer', className)}
-      onClick={handleReadMore}
+    <Link
+      to={productUrl}
+      className={cn('group block', className)}
     >
       {/* Image */}
       <div className={cn(
@@ -101,10 +90,7 @@ export function ProductCard({
             <Button
               size="sm"
               className="w-full gap-2 rounded-xl h-9 text-xs font-medium backdrop-blur-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAdd();
-              }}
+              onClick={handleAdd}
             >
               <ShoppingCart className="h-3.5 w-3.5" />
               افزودن به سبد
@@ -128,7 +114,7 @@ export function ProductCard({
           className="text-sm"
         />
       </div>
-    </div>
+    </Link>
   );
 }
 
