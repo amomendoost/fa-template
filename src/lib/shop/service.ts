@@ -16,6 +16,30 @@ import type {
   ProductReview,
 } from './types';
 
+type ApiProductImage = string | { url?: string | null } | null;
+type ApiProduct = Omit<Product, 'images'> & {
+  images?: ApiProductImage[] | null;
+};
+
+function normalizeProductImages(images: ApiProduct['images']): string[] {
+  if (!Array.isArray(images)) return [];
+
+  return images
+    .map((image) => {
+      if (typeof image === 'string') return image;
+      if (image && typeof image === 'object' && typeof image.url === 'string') return image.url;
+      return null;
+    })
+    .filter((image): image is string => Boolean(image));
+}
+
+function normalizeProduct(product: ApiProduct): Product {
+  return {
+    ...product,
+    images: normalizeProductImages(product.images),
+  };
+}
+
 function getBaseUrl(): string {
   const url = import.meta.env.VITE_API_URL || '';
   const projectId = import.meta.env.VITE_PROJECT_ID || '';
@@ -77,22 +101,22 @@ export async function getProducts(
   if (params?.max_price) query.set('max_price', String(params.max_price));
 
   const qs = query.toString();
-  const data = await fetchJson<{ products: Product[]; pagination: Pagination }>(
+  const data = await fetchJson<{ products: ApiProduct[]; pagination: Pagination }>(
     `/products${qs ? `?${qs}` : ''}`
   );
-  return { data: data.products, pagination: data.pagination };
+  return { data: data.products.map(normalizeProduct), pagination: data.pagination };
 }
 
 export async function getProduct(slug: string): Promise<Product> {
-  const data = await fetchJson<{ product: Product }>(`/products/${encodeURIComponent(slug)}`);
-  return data.product;
+  const data = await fetchJson<{ product: ApiProduct }>(`/products/${encodeURIComponent(slug)}`);
+  return normalizeProduct(data.product);
 }
 
 export async function getRelatedProducts(slug: string): Promise<Product[]> {
-  const data = await fetchJson<{ products: Product[] }>(
+  const data = await fetchJson<{ products: ApiProduct[] }>(
     `/products/${encodeURIComponent(slug)}/related`
   );
-  return data.products;
+  return data.products.map(normalizeProduct);
 }
 
 export async function getProductReviews(slug: string): Promise<ProductReview[]> {

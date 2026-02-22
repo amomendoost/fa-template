@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getProductImageUrl } from '@/lib/shop/images';
 import { useCart } from '@/hooks/use-cart';
 import { PriceTag } from './PriceTag';
 
@@ -41,12 +42,13 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
           <div className="flex-1 overflow-y-auto -mx-6 px-6 space-y-3 py-2">
             {items.map((item) => {
               const key = `${item.product.id}-${item.variant || ''}`;
+              const image = getProductImageUrl(item.product.images?.[0]);
               return (
                 <div key={key} className="flex gap-3">
                   <div className="w-16 h-16 bg-muted rounded-md overflow-hidden shrink-0">
-                    {item.product.images?.[0] ? (
+                    {image ? (
                       <img
-                        src={item.product.images[0]}
+                        src={image}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />

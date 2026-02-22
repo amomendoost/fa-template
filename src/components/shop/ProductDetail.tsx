@@ -11,6 +11,7 @@ import { useProduct } from '@/hooks/use-product';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeHtml } from '@/lib/blog/sanitize';
+import { getProductImageUrls } from '@/lib/shop/images';
 import { PriceTag } from './PriceTag';
 import { ImageLightbox } from './ImageLightbox';
 import { WishlistButton } from './WishlistButton';
@@ -147,7 +148,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
   }
 
   const outOfStock = product.stock <= 0;
-  const images = product.images?.length ? product.images : [];
+  const images = getProductImageUrls(product.images);
   const hasDescriptionHtml = /<\/?[a-z][\s\S]*>/i.test(product.description || '');
   const descriptionHtml = product.description
     ? hasDescriptionHtml

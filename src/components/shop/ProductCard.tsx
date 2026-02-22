@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getProductImageUrl } from '@/lib/shop/images';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { PriceTag } from './PriceTag';
@@ -24,7 +25,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
-  const image = product.images?.[0];
+  const image = getProductImageUrl(product.images?.[0]);
   const outOfStock = product.stock <= 0;
   const hasDiscount = product.compare_price && product.compare_price > product.price;
   const discountPercent = hasDiscount
