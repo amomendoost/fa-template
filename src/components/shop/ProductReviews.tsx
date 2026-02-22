@@ -198,7 +198,7 @@ export function ProductReviews({ slug, className }: ProductReviewsProps) {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{review.author_name}</span>
                       {review.is_verified_purchase && (
-                        <span className="text-[11px] text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
+                        <span className="text-[11px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
                           خریدار
                         </span>
                       )}

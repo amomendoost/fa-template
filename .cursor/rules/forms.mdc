@@ -235,7 +235,7 @@ export const userProfileSchema = z.object({
   preferences: z.object({
     newsletter: z.boolean().default(false),
     notifications: z.boolean().default(true),
-    theme: z.enum(['light', 'dark', 'system']).default('system'),
+    language: z.enum(['fa', 'en']).default('fa'),
   })
 })
 ```

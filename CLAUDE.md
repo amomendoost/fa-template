@@ -89,7 +89,7 @@ Over 40 pre-built components available in `src/components/ui/`:
 
 - `vite.config.ts` - Vite configuration with path aliases and port 8080
 - `components.json` - shadcn/ui configuration with default style and slate base color
-- `tailwind.config.ts` - Tailwind configuration with dark mode support
+- `tailwind.config.ts` - Tailwind configuration
 - `tsconfig.json` - TypeScript configuration with strict mode
 
 ### Environment Variables

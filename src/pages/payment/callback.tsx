@@ -133,7 +133,7 @@ export default function PaymentCallbackPage() {
 
           {status === 'success' && (
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
                 <CheckCircle2 className="w-12 h-12 text-green-600" />
               </div>
               <h2 className="text-xl font-bold text-green-600">پرداخت موفق</h2>
@@ -167,7 +167,7 @@ export default function PaymentCallbackPage() {
 
           {status === 'failed' && (
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center">
                 <XCircle className="w-12 h-12 text-red-600" />
               </div>
               <h2 className="text-xl font-bold text-red-600">پرداخت ناموفق</h2>

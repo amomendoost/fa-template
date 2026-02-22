@@ -46,7 +46,7 @@ const statusConfig = {
   },
   verifying: {
     icon: ShieldCheck,
-    color: 'text-blue-600 dark:text-blue-400',
+    color: 'text-blue-600 ',
     bgColor: 'bg-blue-500/10',
     ringColor: 'ring-blue-500/30',
     gradientFrom: 'from-blue-500/10',
@@ -55,7 +55,7 @@ const statusConfig = {
   },
   pending: {
     icon: Clock,
-    color: 'text-amber-600 dark:text-amber-400',
+    color: 'text-amber-600',
     bgColor: 'bg-amber-500/10',
     ringColor: 'ring-amber-500/30',
     gradientFrom: 'from-amber-500/10',
@@ -64,7 +64,7 @@ const statusConfig = {
   },
   processing: {
     icon: Loader2,
-    color: 'text-blue-600 dark:text-blue-400',
+    color: 'text-blue-600 ',
     bgColor: 'bg-blue-500/10',
     ringColor: 'ring-blue-500/30',
     gradientFrom: 'from-blue-500/10',
@@ -73,7 +73,7 @@ const statusConfig = {
   },
   paid: {
     icon: CheckCircle2,
-    color: 'text-emerald-600 dark:text-emerald-400',
+    color: 'text-emerald-600',
     bgColor: 'bg-emerald-500/10',
     ringColor: 'ring-emerald-500/30',
     gradientFrom: 'from-emerald-500/10',
@@ -82,7 +82,7 @@ const statusConfig = {
   },
   failed: {
     icon: XCircle,
-    color: 'text-red-600 dark:text-red-400',
+    color: 'text-red-600',
     bgColor: 'bg-red-500/10',
     ringColor: 'ring-red-500/30',
     gradientFrom: 'from-red-500/10',
@@ -91,7 +91,7 @@ const statusConfig = {
   },
   expired: {
     icon: AlertTriangle,
-    color: 'text-orange-600 dark:text-orange-400',
+    color: 'text-orange-600',
     bgColor: 'bg-orange-500/10',
     ringColor: 'ring-orange-500/30',
     gradientFrom: 'from-orange-500/10',
@@ -100,7 +100,7 @@ const statusConfig = {
   },
   refunded: {
     icon: RefreshCw,
-    color: 'text-purple-600 dark:text-purple-400',
+    color: 'text-purple-600',
     bgColor: 'bg-purple-500/10',
     ringColor: 'ring-purple-500/30',
     gradientFrom: 'from-purple-500/10',
@@ -173,7 +173,7 @@ export function PaymentStatus({
             </div>
 
             {/* Message */}
-            <h2 className="text-xl font-bold text-center mt-8 text-blue-600 dark:text-blue-400">
+            <h2 className="text-xl font-bold text-center mt-8 text-blue-600 ">
               {message}
             </h2>
 

@@ -101,7 +101,7 @@ export function PostDetail({ slug, post: externalPost, className }: PostDetailPr
 
       {/* Render sanitized HTML content */}
       <div
-        className="prose prose-lg max-w-none dark:prose-invert leading-8 prose-img:mx-auto prose-img:rounded-lg prose-pre:rounded-lg"
+        className="prose prose-lg max-w-none leading-8 prose-img:mx-auto prose-img:rounded-lg prose-pre:rounded-lg"
         dangerouslySetInnerHTML={{ __html: lazyContent }}
       />
 

@@ -443,7 +443,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
           {descriptionHtml && (
             <TabsContent value="description" className="pt-6">
               <div
-                className="prose prose-sm sm:prose-base max-w-none dark:prose-invert text-muted-foreground leading-8"
+                className="prose prose-sm sm:prose-base max-w-none text-muted-foreground leading-8"
                 dangerouslySetInnerHTML={{ __html: descriptionHtml }}
               />
             </TabsContent>

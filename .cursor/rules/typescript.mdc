@@ -33,7 +33,7 @@ export interface ApiResponse<T> {
 }
 
 export type UserRole = 'admin' | 'user' | 'guest'
-export type Theme = 'light' | 'dark' | 'system'
+export type Language = 'fa' | 'en'
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 ```
 

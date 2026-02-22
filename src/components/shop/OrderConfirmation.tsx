@@ -124,7 +124,7 @@ export function OrderConfirmation({
       </Card>
 
       {/* Expiry Warning */}
-      <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3">
+      <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 rounded-lg p-3">
         <Clock className="h-4 w-4 shrink-0" />
         <p>
           این سفارش تا ۱۵ دقیقه معتبر است. در صورت عدم پرداخت، سفارش لغو خواهد شد.
