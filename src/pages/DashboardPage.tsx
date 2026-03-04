@@ -20,7 +20,7 @@ import { useMyOrders } from '@/hooks/use-my-orders';
 import { useSubscriptions } from '@/hooks/use-subscriptions';
 import { useMyCourses } from '@/hooks/use-courses';
 import { useMyEntitlements } from '@/hooks/use-entitlements';
-import type { Order, Entitlement } from '@/lib/shop/types';
+import type { Order, Fulfillment } from '@/lib/shop/types';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: 'در انتظار', color: 'bg-yellow-100 text-yellow-800' },
@@ -28,6 +28,9 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   processing: { label: 'پردازش', color: 'bg-blue-100 text-blue-800' },
   shipped: { label: 'ارسال شده', color: 'bg-purple-100 text-purple-800' },
   delivered: { label: 'تحویل', color: 'bg-green-100 text-green-800' },
+  partially_fulfilled: { label: 'تحویل جزئی', color: 'bg-blue-100 text-blue-800' },
+  fulfilled: { label: 'تکمیل', color: 'bg-green-100 text-green-800' },
+  completed: { label: 'انجام شده', color: 'bg-green-100 text-green-800' },
   cancelled: { label: 'لغو', color: 'bg-red-100 text-red-800' },
   refunded: { label: 'مرجوع', color: 'bg-gray-100 text-gray-800' },
   expired: { label: 'منقضی', color: 'bg-orange-100 text-orange-800' },
@@ -87,32 +90,29 @@ function OrderCard({ order }: { order: Order }) {
   );
 }
 
-function EntitlementsList({ entitlements, download }: {
-  entitlements: Entitlement[];
+function DigitalFulfillmentsList({ fulfillments, download }: {
+  fulfillments: Fulfillment[];
   download: (fulfillmentId: string, fileId: string) => Promise<{ download_url: string }>;
 }) {
-  if (entitlements.length === 0) {
+  if (fulfillments.length === 0) {
     return <p className="text-center py-8 text-sm text-muted-foreground">دانلود یا لایسنسی ندارید</p>;
   }
 
   return (
     <div className="space-y-3">
-      {entitlements.map((ent) => {
-        if (ent.type === 'license_key' && ent.license_key) {
-          return <LicenseKeyDisplay key={ent.id} licenseKey={ent.license_key} productName={ent.product_name} />;
+      {fulfillments.map((f) => {
+        if (f.fulfillment_type === 'license_key' && f.license_key_masked) {
+          return <LicenseKeyDisplay key={f.id} licenseKey={f.license_key_masked} />;
         }
-        if (ent.type === 'auto_download' && ent.files) {
+        if (f.fulfillment_type === 'auto_download' && f.files) {
           return (
-            <div key={ent.id} className="space-y-2">
-              <p className="text-sm font-medium">{ent.product_name}</p>
-              {ent.files.map((file) => (
+            <div key={f.id} className="space-y-2">
+              {f.files.map((file) => (
                 <DownloadButton
                   key={file.id}
-                  fileName={file.name}
-                  sizeBytes={file.size_bytes}
-                  downloadCount={file.download_count}
-                  maxDownloads={file.max_downloads}
-                  onDownload={() => download(ent.id, file.id)}
+                  fileName={file.file_name}
+                  sizeBytes={file.file_size}
+                  onDownload={() => download(f.id, file.id)}
                 />
               ))}
             </div>
@@ -130,7 +130,7 @@ function DashboardContent() {
   const { orders, isLoading: ordersLoading } = useMyOrders();
   const { subscriptions, isLoading: subsLoading, cancel, renew } = useSubscriptions();
   const { courses, isLoading: coursesLoading } = useMyCourses();
-  const { entitlements, isLoading: entLoading, download } = useMyEntitlements();
+  const { fulfillments: digitalFulfillments, isLoading: entLoading, download } = useMyEntitlements();
 
   const tabTriggerClass = 'text-xs sm:text-sm px-3 sm:px-4';
 
@@ -230,7 +230,7 @@ function DashboardContent() {
             {entLoading ? (
               <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
             ) : (
-              <EntitlementsList entitlements={entitlements} download={download} />
+              <DigitalFulfillmentsList fulfillments={digitalFulfillments} download={download} />
             )}
           </TabsContent>
         </Tabs>

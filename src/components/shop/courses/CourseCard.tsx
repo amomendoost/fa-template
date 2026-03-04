@@ -12,15 +12,19 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ enrollment, className }: CourseCardProps) {
+  const courseName = enrollment.course?.title || 'دوره';
+  const courseImage = enrollment.course?.thumbnail_url;
+  const totalLessons = enrollment.course?.total_lessons || 0;
+
   return (
     <Link to={`/courses/${enrollment.course_id}`}>
       <Card className={cn('hover:shadow-md transition-shadow', className)}>
         <CardContent className="p-4 sm:p-5">
           <div className="flex items-start gap-4">
-            {enrollment.course_image ? (
+            {courseImage ? (
               <img
-                src={enrollment.course_image}
-                alt={enrollment.course_name}
+                src={courseImage}
+                alt={courseName}
                 className="h-16 w-24 rounded-xl object-cover shrink-0"
               />
             ) : (
@@ -29,16 +33,18 @@ export function CourseCard({ enrollment, className }: CourseCardProps) {
               </div>
             )}
             <div className="flex-1 min-w-0 space-y-2">
-              <h3 className="font-medium text-sm line-clamp-1">{enrollment.course_name}</h3>
+              <h3 className="font-medium text-sm line-clamp-1">{courseName}</h3>
               <div className="flex items-center gap-2">
                 <Progress value={enrollment.progress_percent} className="flex-1 h-2" />
                 <span className="text-xs text-muted-foreground shrink-0">
                   {Math.round(enrollment.progress_percent).toLocaleString('fa-IR')}%
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {enrollment.completed_lessons.toLocaleString('fa-IR')} از {enrollment.total_lessons.toLocaleString('fa-IR')} درس
-              </p>
+              {totalLessons > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {enrollment.completed_lessons.toLocaleString('fa-IR')} از {totalLessons.toLocaleString('fa-IR')} درس
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

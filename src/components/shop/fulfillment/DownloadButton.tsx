@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 interface DownloadButtonProps {
   fileName: string;
   sizeBytes?: number;
-  downloadCount: number;
+  downloadCount?: number;
   maxDownloads?: number;
   onDownload: () => Promise<{ download_url: string }>;
   className?: string;
@@ -21,7 +21,7 @@ function formatSize(bytes: number): string {
 
 export function DownloadButton({ fileName, sizeBytes, downloadCount, maxDownloads, onDownload, className }: DownloadButtonProps) {
   const [loading, setLoading] = useState(false);
-  const exhausted = maxDownloads !== undefined && downloadCount >= maxDownloads;
+  const exhausted = maxDownloads !== undefined && (downloadCount ?? 0) >= maxDownloads;
 
   const handleDownload = async () => {
     if (exhausted || loading) return;
@@ -42,7 +42,7 @@ export function DownloadButton({ fileName, sizeBytes, downloadCount, maxDownload
         <p className="text-sm font-medium line-clamp-1">{fileName}</p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {sizeBytes && <span>{formatSize(sizeBytes)}</span>}
-          {maxDownloads !== undefined && (
+          {maxDownloads !== undefined && downloadCount !== undefined && (
             <span>
               {downloadCount.toLocaleString('fa-IR')}/{maxDownloads.toLocaleString('fa-IR')} دانلود
             </span>

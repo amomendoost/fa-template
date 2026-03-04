@@ -312,11 +312,10 @@ export async function holdBookingSlot(
   sessionId?: string,
   holdMinutes?: number
 ): Promise<BookingHold> {
-  const data = await fetchJson<{ hold: BookingHold }>('/bookings/hold', {
+  return fetchJson<BookingHold>('/bookings/hold', {
     method: 'POST',
     body: JSON.stringify({ slot_id: slotId, session_id: sessionId, hold_minutes: holdMinutes }),
   });
-  return data.hold;
 }
 
 // ========================================
@@ -353,7 +352,7 @@ export async function cancelSubscription(
 export async function renewSubscription(
   id: string,
   authToken?: string
-): Promise<{ success: boolean; payment_url?: string }> {
+): Promise<{ success: boolean; order?: Order }> {
   return fetchJson('/subscriptions/renew', {
     method: 'POST',
     requireAuth: true,
@@ -380,10 +379,11 @@ export async function getCourseContent(
   courseId: string,
   authToken?: string
 ): Promise<{ modules: CourseModule[]; progress: CourseProgress[] }> {
-  return fetchJson(`/courses/${encodeURIComponent(courseId)}`, {
+  const data = await fetchJson<{ course: { modules: CourseModule[] }; progress: CourseProgress[] }>(`/courses/${encodeURIComponent(courseId)}`, {
     requireAuth: true,
     authToken,
   });
+  return { modules: data.course?.modules || [], progress: data.progress || [] };
 }
 
 export async function updateCourseProgress(
@@ -415,17 +415,18 @@ export async function getOrderFulfillments(
   });
 }
 
-export async function getMyEntitlements(
+export async function getMyDigitalFulfillments(
   authToken?: string
-): Promise<Entitlement[]> {
-  // No standalone /my-entitlements endpoint — aggregate from user's orders
+): Promise<Fulfillment[]> {
+  // No standalone endpoint — aggregate digital fulfillments from user's orders
   const { orders } = await getMyOrders({ limit: 50 }, authToken);
-  const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'delivered');
-  const all: Entitlement[] = [];
+  const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'delivered' || o.status === 'fulfilled' || o.status === 'completed');
+  const all: Fulfillment[] = [];
   for (const order of paidOrders) {
     try {
-      const { entitlements } = await getOrderFulfillments(order.id, authToken);
-      if (entitlements?.length) all.push(...entitlements);
+      const { fulfillments } = await getOrderFulfillments(order.id, authToken);
+      const digital = fulfillments?.filter(f => f.fulfillment_type === 'auto_download' || f.fulfillment_type === 'license_key');
+      if (digital?.length) all.push(...digital);
     } catch {
       // skip orders where fulfillment lookup fails
     }
@@ -436,11 +437,8 @@ export async function getMyEntitlements(
 export async function downloadFile(
   fulfillmentId: string,
   fileId: string,
-  authToken?: string
+  accessToken: string
 ): Promise<{ download_url: string }> {
-  // Backend uses GET /download/{fulfillment_id}/{file_id}?token=...
-  // The token is the order's access_token, not the auth JWT
-  return fetchJson(`/download/${encodeURIComponent(fulfillmentId)}/${encodeURIComponent(fileId)}`, {
-    authToken,
-  });
+  // Backend requires order's access_token as ?token= query param (not JWT)
+  return fetchJson(`/download/${encodeURIComponent(fulfillmentId)}/${encodeURIComponent(fileId)}?token=${encodeURIComponent(accessToken)}`);
 }

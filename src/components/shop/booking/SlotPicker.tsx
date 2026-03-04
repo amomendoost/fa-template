@@ -30,7 +30,7 @@ export function SlotPicker({ slots, selectedSlotId, onSlotSelect, className }: S
   return (
     <div className={cn('grid grid-cols-2 sm:grid-cols-3 gap-2', className)}>
       {slots.map((slot) => {
-        const full = slot.available <= 0;
+        const full = slot.available_spots <= 0;
         const isSelected = selectedSlotId === slot.id;
 
         return (
@@ -49,14 +49,11 @@ export function SlotPicker({ slots, selectedSlotId, onSlotSelect, className }: S
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               <span>{formatTime(slot.start_time)}</span>
             </div>
-            {slot.resource_name && (
-              <span className="text-[11px] text-muted-foreground">{slot.resource_name}</span>
-            )}
             <span className={cn(
               'text-[11px]',
-              full ? 'text-destructive' : slot.available <= 2 ? 'text-orange-500' : 'text-muted-foreground'
+              full ? 'text-destructive' : slot.available_spots <= 2 ? 'text-orange-500' : 'text-muted-foreground'
             )}>
-              {full ? 'تکمیل' : `${slot.available.toLocaleString('fa-IR')} ظرفیت`}
+              {full ? 'تکمیل' : `${slot.available_spots.toLocaleString('fa-IR')} ظرفیت`}
             </span>
           </button>
         );

@@ -90,7 +90,7 @@ export default function BookingPage() {
         {/* Hold banner */}
         {hold && (
           <BookingHoldBanner
-            expiresAt={hold.expires_at}
+            expiresAt={hold.held_until}
             onExpired={() => { setHold(null); setSelectedSlot(null); }}
           />
         )}

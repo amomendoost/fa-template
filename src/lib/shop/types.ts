@@ -25,21 +25,17 @@ export interface Product {
   dimensions?: Record<string, unknown>;
   seo_title?: string;
   seo_description?: string;
-  meta_keywords?: string[];
+  meta_keywords?: string;
   sort_order?: number;
   avg_rating?: number | null;
   review_count?: number;
-  created_at: string;
-  // Extended fields for product kinds
+  created_at?: string;
+  // Extended fields (returned by detail endpoint)
   product_kind?: ProductKind;
   billing_model?: BillingModel;
   fulfillment_type?: FulfillmentType;
+  type_config?: Record<string, unknown>;
   skus?: ProductSku[];
-  // Subscription fields
-  billing_period?: string;
-  trial_days?: number;
-  // Booking fields
-  booking_duration_minutes?: number;
 }
 
 export interface ProductVariant {
@@ -50,14 +46,14 @@ export interface ProductVariant {
 
 export interface ProductSku {
   id: string;
-  product_id: string;
   sku: string;
-  variant_combination: Record<string, string>; // e.g. { "Color": "Red", "Size": "L" }
+  variant_combination: Record<string, string>;
   price: number;
   compare_price?: number;
   stock: number;
   image_url?: string;
   is_active: boolean;
+  sort_order?: number;
 }
 
 export interface ProductCategory {
@@ -82,10 +78,15 @@ export interface CartItem {
 
 // ─── Orders ──────────────────────────────────────────────────
 
+export type OrderStatus =
+  | 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered'
+  | 'partially_fulfilled' | 'fulfilled' | 'completed'
+  | 'cancelled' | 'refunded' | 'expired';
+
 export interface Order {
   id: string;
   order_number: string;
-  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'expired';
+  status: OrderStatus;
   total_amount: number;
   currency: string;
   items: OrderItem[];
@@ -94,7 +95,7 @@ export interface Order {
   notes?: string;
   payment_track_id?: string;
   expires_at?: string;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
   fulfillments?: Fulfillment[];
 }
@@ -105,10 +106,16 @@ export interface OrderItem {
   price: number;
   quantity: number;
   total: number;
-  variant?: string;
+  requires_shipping?: boolean;
   sku_id?: string;
-  product_kind?: ProductKind;
-  fulfillment_type?: FulfillmentType;
+  sku_code?: string;
+  variant_choice?: Record<string, string>;
+  hold_id?: string;
+  product_snapshot?: {
+    product_kind?: ProductKind;
+    fulfillment_type?: FulfillmentType;
+    image?: string;
+  };
 }
 
 export interface CustomerInfo {
@@ -176,47 +183,54 @@ export interface ProductFilterParams {
 export interface BookingResource {
   id: string;
   name: string;
-  description?: string;
+  capacity?: number;
+  timezone?: string;
+  slot_duration_minutes?: number;
 }
 
 export interface BookingSlot {
   id: string;
   resource_id?: string;
-  resource_name?: string;
   start_time: string;
   end_time: string;
   capacity: number;
-  booked: number;
-  available: number;
-  price?: number;
+  booked_count: number;
+  available_spots: number;
+  status?: string;
 }
 
 export interface BookingHold {
-  id: string;
-  slot_id: string;
-  session_id: string;
-  expires_at: string;
+  success: boolean;
+  hold_id: string;
+  held_until: string;
+  slot_start: string;
+  slot_end: string;
 }
 
 // ─── Subscriptions ───────────────────────────────────────────
 
-export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired' | 'past_due' | 'trialing';
+export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired' | 'past_due';
 
 export interface Subscription {
   id: string;
   product_id: string;
-  product_name: string;
-  product_image?: string;
   status: SubscriptionStatus;
-  billing_period: string;
-  price: number;
+  billing_interval: string;
+  billing_interval_count?: number;
+  price_per_period: number;
   currency: string;
-  current_period_start: string;
-  current_period_end: string;
+  current_period_start?: string;
+  current_period_end?: string;
   trial_end?: string;
-  cancelled_at?: string;
   cancel_at_period_end?: boolean;
+  renewal_count?: number;
   created_at: string;
+  product?: {
+    id: string;
+    name: string;
+    slug: string;
+    images?: string[] | null;
+  };
 }
 
 // ─── Courses ─────────────────────────────────────────────────
@@ -224,83 +238,82 @@ export interface Subscription {
 export interface CourseModule {
   id: string;
   title: string;
-  sort_order: number;
+  description?: string;
   lessons: CourseLesson[];
 }
 
 export interface CourseLesson {
   id: string;
-  module_id: string;
   title: string;
   type: 'video' | 'text' | 'quiz';
-  duration_seconds?: number;
-  sort_order: number;
+  content_url?: string;
+  duration_minutes?: number;
+  sort_order?: number;
   is_preview?: boolean;
-  // Content only available when enrolled
-  content?: string;
-  video_url?: string;
 }
 
 export interface CourseEnrollment {
   id: string;
   course_id: string;
-  course_name: string;
-  course_image?: string;
-  enrolled_at: string;
+  status?: string;
   progress_percent: number;
   completed_lessons: number;
-  total_lessons: number;
+  enrolled_at: string;
+  completed_at?: string;
+  last_accessed_at?: string;
+  course?: {
+    id: string;
+    title: string;
+    description?: string;
+    thumbnail_url?: string;
+    total_lessons: number;
+    total_duration_minutes?: number;
+  };
 }
 
 export interface CourseProgress {
   lesson_id: string;
   module_id: string;
   completed: boolean;
-  watch_seconds?: number;
-  updated_at: string;
+  progress_seconds?: number;
+  completed_at?: string;
 }
 
 // ─── Fulfillment & Entitlements ──────────────────────────────
 
-export type FulfillmentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type FulfillmentStatus = 'pending' | 'processing' | 'fulfilled' | 'failed' | 'expired' | 'cancelled';
 
 export interface Fulfillment {
   id: string;
-  order_id: string;
-  order_item_index: number;
-  type: FulfillmentType;
+  order_id?: string;
+  order_item_id?: string;
+  product_id?: string;
+  fulfillment_type: FulfillmentType;
   status: FulfillmentStatus;
-  product_name?: string;
-  // Shipping
-  tracking_number?: string;
-  tracking_url?: string;
-  carrier?: string;
-  // Digital
-  download_url?: string;
-  download_count?: number;
-  max_downloads?: number;
-  expires_at?: string;
-  // License
-  license_key?: string;
-  // Booking
-  booking_slot?: BookingSlot;
-  // Course
-  enrollment_id?: string;
-  created_at: string;
+  delivery_data?: Record<string, unknown>;
+  delivered_at?: string;
+  created_at?: string;
   updated_at?: string;
+  // Enriched by backend for auto_download
+  files?: FulfillmentFile[];
+  // Enriched by backend for license_key
+  license_key_masked?: string;
+}
+
+export interface FulfillmentFile {
+  id: string;
+  file_name: string;
+  file_size?: number;
+  mime_type?: string;
+  sort_order?: number;
 }
 
 export interface Entitlement {
   id: string;
-  type: 'auto_download' | 'license_key' | 'course_access' | 'subscription';
-  product_name: string;
-  // Download
-  files?: EntitlementFile[];
-  // License
-  license_key?: string;
-  // Metadata
+  entitlement_type: 'download_access' | 'license_access' | 'course_access' | 'service_access' | 'subscription_access';
+  status: string;
   expires_at?: string;
-  created_at: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EntitlementFile {

@@ -26,8 +26,8 @@ export function useFulfillments(orderId: string | undefined) {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const download = useCallback(async (fulfillmentId: string, fileId: string) => {
-    return downloadFile(fulfillmentId, fileId);
+  const download = useCallback(async (fulfillmentId: string, fileId: string, accessToken?: string) => {
+    return downloadFile(fulfillmentId, fileId, accessToken || '');
   }, []);
 
   return { fulfillments, entitlements, isLoading, error, download, refresh: fetch };

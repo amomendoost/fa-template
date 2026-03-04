@@ -30,11 +30,10 @@ export function useSubscriptions() {
 
   const renew = useCallback(async (id: string) => {
     const result = await renewSubscription(id);
-    if (result.payment_url) {
-      window.location.href = result.payment_url;
-    } else {
-      await fetch();
-    }
+    // Backend returns a renewal order that needs checkout
+    // Refresh subscriptions list to show the pending renewal
+    await fetch();
+    return result;
   }, [fetch]);
 
   return { subscriptions, isLoading, error, cancel, renew, refresh: fetch };

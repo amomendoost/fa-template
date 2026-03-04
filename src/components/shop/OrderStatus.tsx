@@ -25,6 +25,9 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: React.Ele
   processing: { label: 'در حال پردازش', color: 'bg-blue-100 text-blue-800', icon: Package },
   shipped: { label: 'ارسال شده', color: 'bg-purple-100 text-purple-800', icon: Truck },
   delivered: { label: 'تحویل داده شده', color: 'bg-green-100 text-green-800', icon: CheckCircle2 },
+  partially_fulfilled: { label: 'تحویل جزئی', color: 'bg-blue-100 text-blue-800', icon: Package },
+  fulfilled: { label: 'تکمیل شده', color: 'bg-green-100 text-green-800', icon: CheckCircle2 },
+  completed: { label: 'انجام شده', color: 'bg-green-100 text-green-800', icon: CheckCircle2 },
   cancelled: { label: 'لغو شده', color: 'bg-red-100 text-red-800', icon: XCircle },
   refunded: { label: 'مرجوع شده', color: 'bg-gray-100 text-gray-800', icon: XCircle },
   expired: { label: 'منقضی شده', color: 'bg-orange-100 text-orange-800', icon: Clock },
@@ -113,34 +116,30 @@ export function OrderStatus({ orderNumber: initialOrderNumber, className }: Orde
               </>
             )}
 
-            {/* Downloads & License Keys */}
-            {entitlements.length > 0 && (
+            {/* Downloads & License Keys from fulfillments */}
+            {fulfillments.some(f => f.fulfillment_type === 'auto_download' || f.fulfillment_type === 'license_key') && (
               <>
                 <Separator />
                 <div className="space-y-3">
                   <p className="text-sm font-medium">دسترسی‌های شما</p>
-                  {entitlements.map((ent) => {
-                    if (ent.type === 'license_key' && ent.license_key) {
+                  {fulfillments.map((f) => {
+                    if (f.fulfillment_type === 'license_key' && f.license_key_masked) {
                       return (
                         <LicenseKeyDisplay
-                          key={ent.id}
-                          licenseKey={ent.license_key}
-                          productName={ent.product_name}
+                          key={f.id}
+                          licenseKey={f.license_key_masked}
                         />
                       );
                     }
-                    if (ent.type === 'auto_download' && ent.files) {
+                    if (f.fulfillment_type === 'auto_download' && f.files) {
                       return (
-                        <div key={ent.id} className="space-y-2">
-                          <p className="text-xs text-muted-foreground">{ent.product_name}</p>
-                          {ent.files.map((file) => (
+                        <div key={f.id} className="space-y-2">
+                          {f.files.map((file) => (
                             <DownloadButton
                               key={file.id}
-                              fileName={file.name}
-                              sizeBytes={file.size_bytes}
-                              downloadCount={file.download_count}
-                              maxDownloads={file.max_downloads}
-                              onDownload={() => download(ent.id, file.id)}
+                              fileName={file.file_name}
+                              sizeBytes={file.file_size}
+                              onDownload={() => download(f.id, file.id)}
                             />
                           ))}
                         </div>

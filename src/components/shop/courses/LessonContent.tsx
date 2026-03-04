@@ -29,16 +29,16 @@ export function LessonContent({ lesson, onProgressUpdate, className }: LessonCon
     };
   }, [lesson.id, lesson.type, onProgressUpdate]);
 
-  if (lesson.type === 'video' && lesson.video_url) {
+  if (lesson.type === 'video' && lesson.content_url) {
     // Check if it's an embed URL (YouTube, Vimeo, etc.)
-    const isEmbed = /youtube\.com|youtu\.be|vimeo\.com|aparat\.com/.test(lesson.video_url);
+    const isEmbed = /youtube\.com|youtu\.be|vimeo\.com|aparat\.com/.test(lesson.content_url);
 
     return (
       <div className={cn('space-y-4', className)}>
         {isEmbed ? (
           <div className="aspect-video rounded-xl overflow-hidden bg-black">
             <iframe
-              src={lesson.video_url}
+              src={lesson.content_url}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -48,7 +48,7 @@ export function LessonContent({ lesson, onProgressUpdate, className }: LessonCon
           <div className="aspect-video rounded-xl overflow-hidden bg-black">
             <video
               ref={videoRef}
-              src={lesson.video_url}
+              src={lesson.content_url}
               controls
               className="w-full h-full"
             />
