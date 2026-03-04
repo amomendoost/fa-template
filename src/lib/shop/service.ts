@@ -72,6 +72,8 @@ const SHOP_ERROR_MAP: Record<string, string> = {
   'Coupon is not yet active': 'کد تخفیف هنوز فعال نشده',
   'No available spots': 'ظرفیت این زمان تکمیل شده',
   'Slot not found': 'زمان انتخابی یافت نشد',
+  'Order has expired': 'مهلت پرداخت این سفارش به پایان رسیده. لطفاً سفارش جدید ثبت کنید',
+  'Subscription product is not available': 'محصول اشتراکی دیگر در دسترس نیست',
   'Request failed': 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید',
 };
 
