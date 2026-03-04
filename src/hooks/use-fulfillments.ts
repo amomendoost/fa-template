@@ -9,6 +9,8 @@ export function useFulfillments(orderId: string | undefined) {
   const [isLoading, setIsLoading] = useState(!!orderId);
   const [error, setError] = useState<string | null>(null);
 
+  const [accessToken, setAccessToken] = useState<string | undefined>();
+
   const fetch = useCallback(async () => {
     if (!orderId) return;
     setIsLoading(true);
@@ -17,6 +19,7 @@ export function useFulfillments(orderId: string | undefined) {
       const data = await getOrderFulfillments(orderId);
       setFulfillments(data.fulfillments);
       setEntitlements(data.entitlements);
+      if (data.access_token) setAccessToken(data.access_token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطا در دریافت اطلاعات تحویل');
     } finally {
@@ -26,9 +29,9 @@ export function useFulfillments(orderId: string | undefined) {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const download = useCallback(async (fulfillmentId: string, fileId: string, accessToken?: string) => {
-    return downloadFile(fulfillmentId, fileId, accessToken || '');
-  }, []);
+  const download = useCallback(async (fulfillmentId: string, fileId: string, tokenOverride?: string) => {
+    return downloadFile(fulfillmentId, fileId, tokenOverride || accessToken || '');
+  }, [accessToken]);
 
   return { fulfillments, entitlements, isLoading, error, download, refresh: fetch };
 }

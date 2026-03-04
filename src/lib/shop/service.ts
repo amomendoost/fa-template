@@ -409,24 +409,30 @@ export async function updateCourseProgress(
 export async function getOrderFulfillments(
   orderId: string,
   authToken?: string
-): Promise<{ fulfillments: Fulfillment[]; entitlements: Entitlement[] }> {
+): Promise<{ fulfillments: Fulfillment[]; entitlements: Entitlement[]; access_token?: string }> {
   return fetchJson(`/orders/${encodeURIComponent(orderId)}/fulfillments`, {
     authToken,
   });
 }
 
+export interface DigitalFulfillmentWithToken extends Fulfillment {
+  _access_token?: string;
+}
+
 export async function getMyDigitalFulfillments(
   authToken?: string
-): Promise<Fulfillment[]> {
+): Promise<DigitalFulfillmentWithToken[]> {
   // No standalone endpoint — aggregate digital fulfillments from user's orders
   const { orders } = await getMyOrders({ limit: 50 }, authToken);
   const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'delivered' || o.status === 'fulfilled' || o.status === 'completed');
-  const all: Fulfillment[] = [];
+  const all: DigitalFulfillmentWithToken[] = [];
   for (const order of paidOrders) {
     try {
-      const { fulfillments } = await getOrderFulfillments(order.id, authToken);
+      const { fulfillments, access_token } = await getOrderFulfillments(order.id, authToken);
       const digital = fulfillments?.filter(f => f.fulfillment_type === 'auto_download' || f.fulfillment_type === 'license_key');
-      if (digital?.length) all.push(...digital);
+      if (digital?.length) {
+        all.push(...digital.map(f => ({ ...f, _access_token: access_token })));
+      }
     } catch {
       // skip orders where fulfillment lookup fails
     }

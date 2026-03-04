@@ -54,7 +54,7 @@ export function useCourseContent(courseId: string | undefined) {
     await updateCourseProgress(courseId, lessonId, moduleId, true);
     setProgress(prev => {
       const idx = prev.findIndex(p => p.lesson_id === lessonId);
-      const entry: CourseProgress = { lesson_id: lessonId, module_id: moduleId, completed: true, updated_at: new Date().toISOString() };
+      const entry: CourseProgress = { lesson_id: lessonId, module_id: moduleId, completed: true, completed_at: new Date().toISOString() };
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = entry;

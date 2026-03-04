@@ -38,11 +38,11 @@ export default function PaymentCallbackPage() {
   const [status, setStatus] = useState<VerifyStatus>('verifying');
   const [refNumber, setRefNumber] = useState<string | null>(null);
   const [cardNumber, setCardNumber] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<string | null>(searchParams.get('orderNumber'));
   const [error, setError] = useState<string | null>(null);
 
   const gateway = detectGatewayFromParams(searchParams);
   const trackId = extractTrackIdFromUrl(gateway, searchParams);
-  const orderNumber = searchParams.get('orderNumber');
 
   useEffect(() => {
     if (!trackId) {
@@ -68,18 +68,22 @@ export default function PaymentCallbackPage() {
           order_number: orderNumber || undefined,
         });
 
+        // Extract order_number from verify response (gateway may strip URL params)
+        if (shopResult.order_number) {
+          setOrderNumber(shopResult.order_number);
+        }
+
         if (shopResult.success) {
           setStatus('success');
           setRefNumber(shopResult.ref_number || gatewayResult.data?.refNumber || null);
           setCardNumber(shopResult.card_number || gatewayResult.data?.cardNumber || null);
-          clearCart(); // Clear cart after successful payment
+          clearCart();
         } else {
           // Gateway verified but shop update failed - still show success
-          // (payment is done, order update is secondary)
           setStatus('success');
           setRefNumber(gatewayResult.data?.refNumber || null);
           setCardNumber(gatewayResult.data?.cardNumber || null);
-          clearCart(); // Clear cart anyway since payment was successful
+          clearCart();
           console.warn('Shop order update failed:', shopResult.error);
         }
       } catch (err) {
@@ -89,7 +93,7 @@ export default function PaymentCallbackPage() {
     };
 
     verify();
-  }, [gateway, trackId, orderNumber]);
+  }, [gateway, trackId]);
 
   const handleGoToOrder = () => {
     if (orderNumber) {

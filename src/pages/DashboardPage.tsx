@@ -20,7 +20,8 @@ import { useMyOrders } from '@/hooks/use-my-orders';
 import { useSubscriptions } from '@/hooks/use-subscriptions';
 import { useMyCourses } from '@/hooks/use-courses';
 import { useMyEntitlements } from '@/hooks/use-entitlements';
-import type { Order, Fulfillment } from '@/lib/shop/types';
+import type { Order } from '@/lib/shop/types';
+import type { DigitalFulfillmentWithToken } from '@/lib/shop/service';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: 'در انتظار', color: 'bg-yellow-100 text-yellow-800' },
@@ -91,8 +92,8 @@ function OrderCard({ order }: { order: Order }) {
 }
 
 function DigitalFulfillmentsList({ fulfillments, download }: {
-  fulfillments: Fulfillment[];
-  download: (fulfillmentId: string, fileId: string) => Promise<{ download_url: string }>;
+  fulfillments: DigitalFulfillmentWithToken[];
+  download: (fulfillmentId: string, fileId: string, accessToken?: string) => Promise<{ download_url: string }>;
 }) {
   if (fulfillments.length === 0) {
     return <p className="text-center py-8 text-sm text-muted-foreground">دانلود یا لایسنسی ندارید</p>;
@@ -112,7 +113,7 @@ function DigitalFulfillmentsList({ fulfillments, download }: {
                   key={file.id}
                   fileName={file.file_name}
                   sizeBytes={file.file_size}
-                  onDownload={() => download(f.id, file.id)}
+                  onDownload={() => download(f.id, file.id, f._access_token)}
                 />
               ))}
             </div>

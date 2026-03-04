@@ -1,10 +1,10 @@
 // useMyDigitalFulfillments - fetches all user's digital fulfillments (downloads, licenses)
 import { useState, useEffect, useCallback } from 'react';
 import { getMyDigitalFulfillments, downloadFile } from '@/lib/shop/service';
-import type { Fulfillment } from '@/lib/shop/types';
+import type { DigitalFulfillmentWithToken } from '@/lib/shop/service';
 
 export function useMyEntitlements() {
-  const [fulfillments, setFulfillments] = useState<Fulfillment[]>([]);
+  const [fulfillments, setFulfillments] = useState<DigitalFulfillmentWithToken[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,9 +23,8 @@ export function useMyEntitlements() {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const download = useCallback(async (fulfillmentId: string, fileId: string) => {
-    // TODO: need order access_token for download — for now pass empty
-    return downloadFile(fulfillmentId, fileId, '');
+  const download = useCallback(async (fulfillmentId: string, fileId: string, accessToken?: string) => {
+    return downloadFile(fulfillmentId, fileId, accessToken || '');
   }, []);
 
   return { fulfillments, isLoading, error, download, refresh: fetch };
