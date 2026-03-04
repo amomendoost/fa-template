@@ -25,7 +25,7 @@ async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (!res.ok) throw new Error(data.error || 'خطا در ارتباط با سرور');
   return data;
 }
 

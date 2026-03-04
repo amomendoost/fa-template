@@ -30,7 +30,7 @@ export function useBlogPost(slug: string | undefined) {
         }
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load post');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'خطا در بارگذاری مطلب');
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

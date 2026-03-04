@@ -40,7 +40,7 @@ export function useMyOrders(options?: UseMyOrdersOptions) {
       setOrders(result.orders || []);
       setPagination(result.pagination);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to load orders';
+      const msg = err instanceof Error ? err.message : 'خطا در بارگذاری سفارشات';
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -59,7 +59,7 @@ export function useMyOrders(options?: UseMyOrdersOptions) {
 
   const linkOrder = useCallback(async (orderNumber: string, verifyPhone?: string) => {
     if (!isAuthenticated()) {
-      return { success: false, error: 'Not logged in' };
+      return { success: false, error: 'لطفاً ابتدا وارد حساب کاربری شوید' };
     }
 
     setIsLoading(true);
@@ -73,7 +73,7 @@ export function useMyOrders(options?: UseMyOrdersOptions) {
       }
       return result;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to link order';
+      const msg = err instanceof Error ? err.message : 'خطا در اتصال سفارش';
       setError(msg);
       return { success: false, error: msg };
     } finally {

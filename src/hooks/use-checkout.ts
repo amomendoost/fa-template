@@ -26,7 +26,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
         // Don't call onSuccess here - only after payment is complete
         return result;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Order creation failed';
+        const msg = err instanceof Error ? err.message : 'خطا در ثبت سفارش';
         setError(msg);
         options?.onError?.(msg);
         return null;
@@ -52,10 +52,10 @@ export function useCheckout(options?: UseCheckoutOptions) {
         if (result.success && result.payment_url) {
           window.location.href = result.payment_url;
         } else {
-          throw new Error(result.error || 'Checkout failed');
+          throw new Error(result.error || 'خطا در شروع پرداخت');
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Checkout failed';
+        const msg = err instanceof Error ? err.message : 'خطا در شروع پرداخت';
         setError(msg);
         options?.onError?.(msg);
       } finally {
@@ -73,7 +73,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
       setOrder(result);
       return result;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Order not found';
+      const msg = err instanceof Error ? err.message : 'سفارش یافت نشد';
       setError(msg);
       return null;
     } finally {

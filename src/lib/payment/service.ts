@@ -101,7 +101,7 @@ export async function createPayment(
     if (!response.ok || !data.success) {
       return {
         success: false,
-        error: data.error || 'Payment creation failed',
+        error: data.error || 'خطا در ایجاد پرداخت',
       };
     }
 
@@ -116,7 +116,7 @@ export async function createPayment(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error',
+      error: error instanceof Error ? error.message : 'خطا در ارتباط با سرور',
     };
   }
 }
@@ -156,7 +156,7 @@ export async function verifyPayment(
     if (!response.ok) {
       return {
         success: false,
-        error: data.error || 'Verification failed',
+        error: data.error || 'خطا در تأیید پرداخت',
       };
     }
 
@@ -181,12 +181,12 @@ export async function verifyPayment(
         amount: data.data?.amount,
         ...data.data,
       },
-      error: isSuccess ? undefined : data.error || 'Payment was not successful',
+      error: isSuccess ? undefined : data.error || 'پرداخت موفق نبود',
     };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error',
+      error: error instanceof Error ? error.message : 'خطا در ارتباط با سرور',
     };
   }
 }

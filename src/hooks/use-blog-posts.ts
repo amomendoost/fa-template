@@ -18,7 +18,7 @@ export function useBlogPosts(params?: BlogFilterParams) {
       setPosts(res.data);
       setPagination(res.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
+      setError(err instanceof Error ? err.message : 'خطا در بارگذاری مطالب');
     } finally {
       setIsLoading(false);
     }

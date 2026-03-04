@@ -25,7 +25,7 @@ export function useProduct(slug: string | undefined) {
         if (!cancelled) setProduct(data);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load product');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'خطا در بارگذاری محصول');
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

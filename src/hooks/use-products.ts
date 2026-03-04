@@ -18,7 +18,7 @@ export function useProducts(params?: ProductFilterParams) {
       setProducts(res.data);
       setPagination(res.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products');
+      setError(err instanceof Error ? err.message : 'خطا در بارگذاری محصولات');
     } finally {
       setIsLoading(false);
     }
