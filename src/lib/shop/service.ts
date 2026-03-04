@@ -50,6 +50,42 @@ function normalizeProduct(product: ApiProduct): Product {
   };
 }
 
+// Map backend error messages to user-friendly Farsi
+const SHOP_ERROR_MAP: Record<string, string> = {
+  'Shop is not enabled for this project': 'فروشگاه برای این پروژه فعال نیست. لطفاً از بخش مدیریت، فروشگاه را فعال کنید',
+  'Payment integration not enabled': 'درگاه پرداخت فعال نیست. لطفاً از بخش تنظیمات، درگاه پرداخت را پیکربندی کنید',
+  'Gateway configuration missing': 'تنظیمات درگاه پرداخت ناقص است. لطفاً از بخش تنظیمات، درگاه پرداخت را پیکربندی کنید',
+  'Order not found or already processed': 'سفارش یافت نشد یا قبلاً پردازش شده',
+  'Order not found': 'سفارش یافت نشد',
+  'Product not found': 'محصول یافت نشد',
+  'Product is not active': 'این محصول در حال حاضر فعال نیست',
+  'Insufficient stock': 'موجودی کافی نیست',
+  'Cart is empty': 'سبد خرید خالی است',
+  'Authentication required': 'لطفاً ابتدا وارد حساب کاربری شوید',
+  'Invalid project_id format': 'شناسه پروژه نامعتبر است',
+  'Each item needs product_id and quantity': 'هر آیتم باید شامل شناسه محصول و تعداد باشد',
+  'order_id and integration_id are required': 'لطفاً درگاه پرداخت را انتخاب کنید',
+  'Payment verification failed': 'تأیید پرداخت ناموفق بود. لطفاً با پشتیبانی تماس بگیرید',
+  'Coupon not found': 'کد تخفیف یافت نشد',
+  'Coupon has expired': 'کد تخفیف منقضی شده',
+  'Coupon usage limit reached': 'کد تخفیف به حداکثر استفاده رسیده',
+  'Coupon is not yet active': 'کد تخفیف هنوز فعال نشده',
+  'No available spots': 'ظرفیت این زمان تکمیل شده',
+  'Slot not found': 'زمان انتخابی یافت نشد',
+  'Request failed': 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید',
+};
+
+function translateShopError(msg: string): string {
+  if (SHOP_ERROR_MAP[msg]) return SHOP_ERROR_MAP[msg];
+  if (msg.includes('not enabled') || msg.includes('not configured'))
+    return 'این سرویس فعال نیست. لطفاً از بخش مدیریت، آن را فعال کنید';
+  if (msg.includes('Rate limit') || msg.includes('Too many'))
+    return 'تعداد درخواست‌ها زیاد شد. لطفاً کمی صبر کنید';
+  if (msg.includes('not found'))
+    return 'مورد درخواستی یافت نشد';
+  return msg;
+}
+
 function getBaseUrl(): string {
   const url = import.meta.env.VITE_API_URL || '';
   const projectId = import.meta.env.VITE_PROJECT_ID || '';
@@ -94,7 +130,7 @@ async function fetchJson<T>(path: string, options?: FetchOptions): Promise<T> {
     headers,
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (!res.ok) throw new Error(translateShopError(data.error || 'Request failed'));
   return data;
 }
 
