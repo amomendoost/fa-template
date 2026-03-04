@@ -96,7 +96,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
               maxLength={6}
             />
             {error && <p className="text-sm text-destructive text-center">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isLoading || code.length < 4}>
+            <Button type="submit" className="w-full" disabled={isLoading || code.length !== 6}>
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
               تأیید
             </Button>

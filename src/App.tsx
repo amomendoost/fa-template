@@ -38,7 +38,7 @@ const App = () => (
           <Route path="/shop/:slug" element={<ProductPage />} />
           <Route path="/shop/:slug/book" element={<BookingPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order" element={<OrderTrackingPage />} />
+          <Route path="/order/:orderNumber?" element={<OrderTrackingPage />} />
           {/* Course Routes */}
           <Route path="/courses/:courseId" element={<CoursePage />} />
           {/* Blog Routes */}

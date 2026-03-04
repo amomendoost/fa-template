@@ -570,8 +570,8 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex flex-col items-start">
             <PriceTag
-              price={product.price}
-              comparePrice={product.compare_price}
+              price={effectivePrice}
+              comparePrice={effectiveComparePrice}
               currency={product.currency}
               className="text-base"
             />
