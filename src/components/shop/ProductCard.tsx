@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { PriceTag } from './PriceTag';
 import { WishlistButton } from './WishlistButton';
+import { ProductTypeBadge } from './ProductTypeBadge';
 import type { Product } from '@/lib/shop/types';
 
 interface ProductCardProps {
@@ -102,9 +103,12 @@ export function ProductCard({
 
       {/* Info */}
       <div className="space-y-1.5 px-0.5">
-        {product.category && (
-          <span className="text-[11px] text-muted-foreground">{product.category}</span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {product.category && (
+            <span className="text-[11px] text-muted-foreground">{product.category}</span>
+          )}
+          <ProductTypeBadge kind={product.product_kind} />
+        </div>
         <h3 className="text-sm font-medium line-clamp-2 leading-snug group-hover:text-primary transition-colors">
           {product.name}
         </h3>

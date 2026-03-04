@@ -1,6 +1,7 @@
 // OrderConfirmation - Shows order details before payment redirect
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Copy, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -112,10 +113,20 @@ export function OrderConfirmation({
           <CardTitle className="text-base">خلاصه سفارش</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">تعداد اقلام</span>
-            <span>{order.items?.length || 0} عدد</span>
-          </div>
+          {order.items && order.items.length > 0 && (
+            <>
+              {order.items.map((item, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span>
+                    {item.name} × {item.quantity.toLocaleString('fa-IR')}
+                    {item.variant && <span className="text-muted-foreground"> ({item.variant})</span>}
+                  </span>
+                  <PriceTag price={item.total} currency={order.currency || 'IRT'} />
+                </div>
+              ))}
+              <Separator className="my-1" />
+            </>
+          )}
           <div className="flex justify-between font-bold">
             <span>مبلغ قابل پرداخت</span>
             <PriceTag price={order.total_amount} currency={order.currency || 'IRT'} />

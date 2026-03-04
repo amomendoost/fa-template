@@ -20,9 +20,9 @@ function write(items: CartItem[]): CartItem[] {
   return items;
 }
 
-function findIndex(items: CartItem[], productId: string, variant?: string): number {
+function findIndex(items: CartItem[], productId: string, variant?: string, skuId?: string): number {
   return items.findIndex(
-    (item) => item.product.id === productId && item.variant === variant
+    (item) => item.product.id === productId && item.variant === variant && item.sku_id === skuId
   );
 }
 
@@ -30,22 +30,28 @@ export function getCart(): CartItem[] {
   return read();
 }
 
-export function addToCart(product: Product, quantity = 1, variant?: string): CartItem[] {
+export function addToCart(
+  product: Product,
+  quantity = 1,
+  variant?: string,
+  skuId?: string,
+  variantChoice?: Record<string, string>
+): CartItem[] {
   const items = read();
-  const idx = findIndex(items, product.id, variant);
+  const idx = findIndex(items, product.id, variant, skuId);
 
   if (idx >= 0) {
     items[idx].quantity += quantity;
   } else {
-    items.push({ product, quantity, variant });
+    items.push({ product, quantity, variant, sku_id: skuId, variant_choice: variantChoice });
   }
 
   return write(items);
 }
 
-export function removeFromCart(productId: string, variant?: string): CartItem[] {
+export function removeFromCart(productId: string, variant?: string, skuId?: string): CartItem[] {
   const items = read();
-  const idx = findIndex(items, productId, variant);
+  const idx = findIndex(items, productId, variant, skuId);
   if (idx >= 0) items.splice(idx, 1);
   return write(items);
 }
@@ -53,10 +59,11 @@ export function removeFromCart(productId: string, variant?: string): CartItem[] 
 export function updateQuantity(
   productId: string,
   quantity: number,
-  variant?: string
+  variant?: string,
+  skuId?: string
 ): CartItem[] {
   const items = read();
-  const idx = findIndex(items, productId, variant);
+  const idx = findIndex(items, productId, variant, skuId);
 
   if (idx >= 0) {
     if (quantity <= 0) {
@@ -81,7 +88,13 @@ export function getCartTotal(): { count: number; total: number; currency: string
   let currency = 'IRR';
 
   for (const item of items) {
-    total += item.product.price * item.quantity;
+    // Use SKU price if available
+    let itemPrice = item.product.price;
+    if (item.sku_id && item.product.skus) {
+      const sku = item.product.skus.find(s => s.id === item.sku_id);
+      if (sku) itemPrice = sku.price;
+    }
+    total += itemPrice * item.quantity;
     count += item.quantity;
     currency = item.product.currency || currency;
   }

@@ -23,16 +23,22 @@ export function useCart() {
     });
   }, []);
 
-  const addItem = useCallback((product: Product, quantity = 1, variant?: string) => {
-    addToCart(product, quantity, variant);
+  const addItem = useCallback((
+    product: Product,
+    quantity = 1,
+    variant?: string,
+    skuId?: string,
+    variantChoice?: Record<string, string>
+  ) => {
+    addToCart(product, quantity, variant, skuId, variantChoice);
   }, []);
 
-  const removeItem = useCallback((productId: string, variant?: string) => {
-    removeFromCart(productId, variant);
+  const removeItem = useCallback((productId: string, variant?: string, skuId?: string) => {
+    removeFromCart(productId, variant, skuId);
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number, variant?: string) => {
-    updateCartQuantity(productId, quantity, variant);
+  const updateQuantity = useCallback((productId: string, quantity: number, variant?: string, skuId?: string) => {
+    updateCartQuantity(productId, quantity, variant, skuId);
   }, []);
 
   const clear = useCallback(() => {

@@ -1,11 +1,12 @@
 // ProductDetail - full product page: gallery, description, variants, add to cart
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Minus, Plus, ZoomIn, Package, ChevronLeft, ChevronRight, Share2, Copy, Check, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, ZoomIn, Package, ChevronLeft, ChevronRight, Copy, Check, MessageCircle, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProduct } from '@/hooks/use-product';
 import { useCart } from '@/hooks/use-cart';
@@ -17,7 +18,9 @@ import { ImageLightbox } from './ImageLightbox';
 import { WishlistButton } from './WishlistButton';
 import { StarRating } from './StarRating';
 import { ProductReviews } from './ProductReviews';
-import type { Product } from '@/lib/shop/types';
+import { SkuVariantPicker } from './SkuVariantPicker';
+import { ProductTypeBadge } from './ProductTypeBadge';
+import type { Product, ProductSku } from '@/lib/shop/types';
 
 interface ProductDetailProps {
   slug?: string;
@@ -97,6 +100,7 @@ function MiniShareBar({ productName }: { productName: string }) {
 }
 
 export function ProductDetail({ slug, product: externalProduct, onAddToCart, className }: ProductDetailProps) {
+  const navigate = useNavigate();
   const { product: fetchedProduct, isLoading, error } = useProduct(externalProduct ? undefined : slug);
   const product = externalProduct ?? fetchedProduct;
   const { addItem } = useCart();
@@ -104,6 +108,8 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>();
+  const [selectedSku, setSelectedSku] = useState<ProductSku | null>(null);
+  const [variantChoice, setVariantChoice] = useState<Record<string, string>>({});
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgFading, setImgFading] = useState(false);
   const purchaseRef = useRef<HTMLDivElement>(null);
@@ -161,8 +167,14 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
     : 0;
   const specs = buildSpecs(product);
 
+  const hasSku = product.skus && product.skus.length > 0;
+  const effectivePrice = selectedSku?.price ?? product.price;
+  const effectiveComparePrice = selectedSku?.compare_price ?? product.compare_price;
+  const effectiveStock = selectedSku ? selectedSku.stock : product.stock;
+  const effectiveOutOfStock = effectiveStock <= 0;
+
   const handleAdd = () => {
-    addItem(product, quantity, selectedVariant);
+    addItem(product, quantity, selectedVariant, selectedSku?.id, hasSku ? variantChoice : undefined);
     onAddToCart?.(product);
     toast({
       title: 'به سبد خرید اضافه شد',
@@ -287,9 +299,10 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
 
           {/* Purchase Info */}
           <div className="flex flex-col gap-6 py-2">
-            {/* Category + share */}
+            {/* Category + type badge + share */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
+                <ProductTypeBadge kind={product.product_kind} />
                 {product.category && (
                   <span className="text-sm text-muted-foreground">{product.category}</span>
                 )}
@@ -312,13 +325,45 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
               <WishlistButton productId={product.id} />
             </div>
 
-            {/* Price */}
-            <PriceTag
-              price={product.price}
-              comparePrice={product.compare_price}
-              currency={product.currency}
-              className="text-2xl"
-            />
+            {/* Price (use SKU price if selected) */}
+            {!hasSku && (
+              <PriceTag
+                price={product.price}
+                comparePrice={product.compare_price}
+                currency={product.currency}
+                className="text-2xl"
+              />
+            )}
+
+            {/* Subscription info */}
+            {product.product_kind === 'subscription' && (
+              <div className="space-y-1">
+                {product.billing_period && (
+                  <p className="text-sm text-muted-foreground">
+                    دوره پرداخت: {product.billing_period === 'monthly' ? 'ماهانه' : product.billing_period === 'yearly' ? 'سالانه' : product.billing_period === 'weekly' ? 'هفتگی' : product.billing_period}
+                  </p>
+                )}
+                {product.trial_days && product.trial_days > 0 && (
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                    {product.trial_days.toLocaleString('fa-IR')} روز استفاده رایگان
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Digital product info */}
+            {(product.product_kind === 'digital' || product.product_kind === 'license_key') && (
+              <p className="text-sm text-muted-foreground">
+                {product.product_kind === 'digital' ? 'پس از خرید، لینک دانلود در اختیار شما قرار می‌گیرد' : 'پس از خرید، کلید لایسنس برای شما ارسال می‌شود'}
+              </p>
+            )}
+
+            {/* Booking duration */}
+            {product.product_kind === 'booking' && product.booking_duration_minutes && (
+              <p className="text-sm text-muted-foreground">
+                مدت هر جلسه: {product.booking_duration_minutes.toLocaleString('fa-IR')} دقیقه
+              </p>
+            )}
 
             {/* Stock */}
             <div className="flex items-center gap-1.5 text-sm">
@@ -341,8 +386,16 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
 
             <Separator />
 
-            {/* Variants */}
-            {product.variants && product.variants.length > 0 && (
+            {/* SKU Variant Picker (advanced) or legacy variants */}
+            {hasSku ? (
+              <div className="space-y-4">
+                <SkuVariantPicker
+                  product={product}
+                  onSkuChange={(sku, choice) => { setSelectedSku(sku); setVariantChoice(choice); }}
+                />
+                <Separator />
+              </div>
+            ) : product.variants && product.variants.length > 0 ? (
               <div className="space-y-4">
                 {product.variants.map((variant) => (
                   <div key={variant.name} className="space-y-2.5">
@@ -367,39 +420,57 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
                 ))}
                 <Separator />
               </div>
-            )}
+            ) : null}
 
-            {/* Quantity + Add */}
+            {/* Quantity + Add (or Booking/Subscription CTA) */}
             <div ref={purchaseRef} className="flex items-center gap-3">
-              <div className="flex items-center h-12 rounded-full bg-muted/60">
+              {product.product_kind === 'booking' ? (
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-12 w-12 rounded-full hover:bg-muted"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="flex-1 h-12 gap-2 font-semibold rounded-full text-[15px]"
+                  onClick={() => navigate(`/shop/${product.slug}/book`)}
                 >
-                  <Minus className="h-4 w-4" />
+                  <Calendar className="h-4 w-4" />
+                  انتخاب زمان و رزرو
                 </Button>
-                <span className="w-8 text-center font-semibold tabular-nums select-none">
-                  {quantity.toLocaleString('fa-IR')}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-12 w-12 rounded-full hover:bg-muted"
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button
-                className="flex-1 h-12 gap-2 font-semibold rounded-full text-[15px]"
-                disabled={outOfStock}
-                onClick={handleAdd}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                {outOfStock ? 'ناموجود' : 'افزودن به سبد خرید'}
-              </Button>
+              ) : (
+                <>
+                  <div className="flex items-center h-12 rounded-full bg-muted/60">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-12 w-12 rounded-full hover:bg-muted"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="w-8 text-center font-semibold tabular-nums select-none">
+                      {quantity.toLocaleString('fa-IR')}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-12 w-12 rounded-full hover:bg-muted"
+                      onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    className="flex-1 h-12 gap-2 font-semibold rounded-full text-[15px]"
+                    disabled={effectiveOutOfStock || (hasSku && !selectedSku)}
+                    onClick={handleAdd}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    {effectiveOutOfStock
+                      ? 'ناموجود'
+                      : product.product_kind === 'subscription'
+                        ? 'خرید اشتراک'
+                        : product.product_kind === 'course'
+                          ? 'ثبت‌نام در دوره'
+                          : 'افزودن به سبد خرید'}
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Quick specs preview */}
@@ -493,7 +564,7 @@ export function ProductDetail({ slug, product: externalProduct, onAddToCart, cla
       <div
         className={cn(
           'fixed bottom-0 inset-x-0 z-50 lg:hidden bg-background/95 backdrop-blur-md border-t px-4 py-3 transition-transform duration-300',
-          showStickyBar && !outOfStock ? 'translate-y-0' : 'translate-y-full'
+          showStickyBar && !effectiveOutOfStock ? 'translate-y-0' : 'translate-y-full'
         )}
       >
         <div className="flex items-center gap-3 max-w-lg mx-auto">

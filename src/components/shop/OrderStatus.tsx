@@ -1,5 +1,5 @@
-// OrderStatus - order tracking with timeline
-import { useState } from 'react';
+// OrderStatus - order tracking with fulfillment display
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Search, Package, Clock, CheckCircle2, XCircle, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCheckout } from '@/hooks/use-checkout';
+import { useFulfillments } from '@/hooks/use-fulfillments';
 import { PriceTag } from './PriceTag';
+import { FulfillmentStatusDisplay } from './fulfillment/FulfillmentStatus';
+import { DownloadButton } from './fulfillment/DownloadButton';
+import { LicenseKeyDisplay } from './fulfillment/LicenseKeyDisplay';
 
 interface OrderStatusProps {
   orderNumber?: string;
@@ -29,6 +33,12 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: React.Ele
 export function OrderStatus({ orderNumber: initialOrderNumber, className }: OrderStatusProps) {
   const [input, setInput] = useState(initialOrderNumber || '');
   const { trackOrder, isLoading, error, order } = useCheckout();
+
+  // Fetch fulfillments when order is loaded and paid
+  const shouldFetchFulfillments = order && order.status !== 'pending' && order.status !== 'expired';
+  const { fulfillments, entitlements, download } = useFulfillments(
+    shouldFetchFulfillments ? order.id : undefined
+  );
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +98,58 @@ export function OrderStatus({ orderNumber: initialOrderNumber, className }: Orde
               <p className="text-xs text-muted-foreground">
                 تاریخ ثبت: {new Date(order.created_at).toLocaleDateString('fa-IR')}
               </p>
+            )}
+
+            {/* Fulfillment Status */}
+            {fulfillments.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">وضعیت تحویل</p>
+                  {fulfillments.map((f) => (
+                    <FulfillmentStatusDisplay key={f.id} fulfillment={f} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Downloads & License Keys */}
+            {entitlements.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">دسترسی‌های شما</p>
+                  {entitlements.map((ent) => {
+                    if (ent.type === 'license_key' && ent.license_key) {
+                      return (
+                        <LicenseKeyDisplay
+                          key={ent.id}
+                          licenseKey={ent.license_key}
+                          productName={ent.product_name}
+                        />
+                      );
+                    }
+                    if (ent.type === 'auto_download' && ent.files) {
+                      return (
+                        <div key={ent.id} className="space-y-2">
+                          <p className="text-xs text-muted-foreground">{ent.product_name}</p>
+                          {ent.files.map((file) => (
+                            <DownloadButton
+                              key={file.id}
+                              fileName={file.name}
+                              sizeBytes={file.size_bytes}
+                              downloadCount={file.download_count}
+                              maxDownloads={file.max_downloads}
+                              onDownload={() => download(ent.id, file.id)}
+                            />
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

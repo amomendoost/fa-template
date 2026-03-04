@@ -14,6 +14,16 @@ import type {
   CheckoutRequest,
   CheckoutResponse,
   ProductReview,
+  BookingSlot,
+  BookingResource,
+  BookingHold,
+  Subscription,
+  SubscriptionStatus,
+  CourseEnrollment,
+  CourseModule,
+  CourseProgress,
+  Fulfillment,
+  Entitlement,
 } from './types';
 
 type ApiProductImage = string | { url?: string | null } | null;
@@ -150,6 +160,8 @@ export async function createOrder(
     product_id: item.product.id,
     quantity: item.quantity,
     variant: item.variant,
+    sku_id: item.sku_id,
+    variant_choice: item.variant_choice,
   }));
 
   const data = await fetchJson<{ success: boolean; order: Order }>('/orders', {
@@ -258,6 +270,8 @@ export async function createOrderWithAuth(
     product_id: item.product.id,
     quantity: item.quantity,
     variant: item.variant,
+    sku_id: item.sku_id,
+    variant_choice: item.variant_choice,
   }));
 
   const data = await fetchJson<{ success: boolean; order: Order }>('/orders', {
@@ -277,4 +291,156 @@ export async function createOrderWithAuth(
  */
 export function isAuthenticated(): boolean {
   return getAuthToken() !== null;
+}
+
+// ========================================
+// Booking Endpoints
+// ========================================
+
+export async function getBookingSlots(
+  productId: string,
+  date?: string
+): Promise<{ slots: BookingSlot[]; resources: BookingResource[] }> {
+  const query = new URLSearchParams();
+  query.set('product_id', productId);
+  if (date) query.set('date', date);
+  return fetchJson(`/booking-slots?${query.toString()}`);
+}
+
+export async function holdBookingSlot(
+  slotId: string,
+  sessionId?: string,
+  holdMinutes?: number
+): Promise<BookingHold> {
+  const data = await fetchJson<{ hold: BookingHold }>('/bookings/hold', {
+    method: 'POST',
+    body: JSON.stringify({ slot_id: slotId, session_id: sessionId, hold_minutes: holdMinutes }),
+  });
+  return data.hold;
+}
+
+// ========================================
+// Subscription Endpoints
+// ========================================
+
+export async function getMySubscriptions(
+  status?: SubscriptionStatus,
+  authToken?: string
+): Promise<Subscription[]> {
+  const query = new URLSearchParams();
+  if (status) query.set('status', status);
+  const qs = query.toString();
+  const data = await fetchJson<{ subscriptions: Subscription[] }>(
+    `/my-subscriptions${qs ? `?${qs}` : ''}`,
+    { requireAuth: true, authToken }
+  );
+  return data.subscriptions;
+}
+
+export async function cancelSubscription(
+  id: string,
+  immediate?: boolean,
+  authToken?: string
+): Promise<{ success: boolean }> {
+  return fetchJson('/subscriptions/cancel', {
+    method: 'POST',
+    requireAuth: true,
+    authToken,
+    body: JSON.stringify({ subscription_id: id, immediate }),
+  });
+}
+
+export async function renewSubscription(
+  id: string,
+  authToken?: string
+): Promise<{ success: boolean; payment_url?: string }> {
+  return fetchJson('/subscriptions/renew', {
+    method: 'POST',
+    requireAuth: true,
+    authToken,
+    body: JSON.stringify({ subscription_id: id }),
+  });
+}
+
+// ========================================
+// Course Endpoints
+// ========================================
+
+export async function getMyCourses(
+  authToken?: string
+): Promise<CourseEnrollment[]> {
+  const data = await fetchJson<{ courses: CourseEnrollment[] }>('/my-courses', {
+    requireAuth: true,
+    authToken,
+  });
+  return data.courses;
+}
+
+export async function getCourseContent(
+  courseId: string,
+  authToken?: string
+): Promise<{ modules: CourseModule[]; progress: CourseProgress[] }> {
+  return fetchJson(`/courses/${encodeURIComponent(courseId)}`, {
+    requireAuth: true,
+    authToken,
+  });
+}
+
+export async function updateCourseProgress(
+  courseId: string,
+  lessonId: string,
+  moduleId: string,
+  completed?: boolean,
+  seconds?: number,
+  authToken?: string
+): Promise<{ success: boolean }> {
+  return fetchJson(`/courses/${encodeURIComponent(courseId)}/progress`, {
+    method: 'POST',
+    requireAuth: true,
+    authToken,
+    body: JSON.stringify({ lesson_id: lessonId, module_id: moduleId, completed, progress_seconds: seconds }),
+  });
+}
+
+// ========================================
+// Fulfillment Endpoints
+// ========================================
+
+export async function getOrderFulfillments(
+  orderId: string,
+  authToken?: string
+): Promise<{ fulfillments: Fulfillment[]; entitlements: Entitlement[] }> {
+  return fetchJson(`/orders/${encodeURIComponent(orderId)}/fulfillments`, {
+    authToken,
+  });
+}
+
+export async function getMyEntitlements(
+  authToken?: string
+): Promise<Entitlement[]> {
+  // No standalone /my-entitlements endpoint — aggregate from user's orders
+  const { orders } = await getMyOrders({ limit: 50 }, authToken);
+  const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'delivered');
+  const all: Entitlement[] = [];
+  for (const order of paidOrders) {
+    try {
+      const { entitlements } = await getOrderFulfillments(order.id, authToken);
+      if (entitlements?.length) all.push(...entitlements);
+    } catch {
+      // skip orders where fulfillment lookup fails
+    }
+  }
+  return all;
+}
+
+export async function downloadFile(
+  fulfillmentId: string,
+  fileId: string,
+  authToken?: string
+): Promise<{ download_url: string }> {
+  // Backend uses GET /download/{fulfillment_id}/{file_id}?token=...
+  // The token is the order's access_token, not the auth JWT
+  return fetchJson(`/download/${encodeURIComponent(fulfillmentId)}/${encodeURIComponent(fileId)}`, {
+    authToken,
+  });
 }

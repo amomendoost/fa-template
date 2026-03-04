@@ -15,6 +15,11 @@ interface CartDrawerProps {
   className?: string;
 }
 
+function formatVariantChoice(choice?: Record<string, string>): string {
+  if (!choice || Object.keys(choice).length === 0) return '';
+  return Object.entries(choice).map(([k, v]) => `${k}: ${v}`).join(' | ');
+}
+
 export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerProps) {
   const { items, count, total, currency, updateQuantity, removeItem, clear } = useCart();
 
@@ -41,8 +46,18 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
         ) : (
           <div className="flex-1 overflow-y-auto -mx-6 px-6 space-y-3 py-2">
             {items.map((item) => {
-              const key = `${item.product.id}-${item.variant || ''}`;
+              const key = `${item.product.id}-${item.variant || ''}-${item.sku_id || ''}`;
               const image = getProductImageUrl(item.product.images?.[0]);
+              const variantLabel = item.variant_choice
+                ? formatVariantChoice(item.variant_choice)
+                : item.variant || '';
+
+              // For SKU items, find the SKU to get its price
+              const skuPrice = item.sku_id && item.product.skus
+                ? item.product.skus.find(s => s.id === item.sku_id)?.price
+                : undefined;
+              const displayPrice = skuPrice ?? item.product.price;
+
               return (
                 <div key={key} className="flex gap-3">
                   <div className="w-16 h-16 bg-muted rounded-md overflow-hidden shrink-0">
@@ -60,11 +75,11 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.product.name}</p>
-                    {item.variant && (
-                      <p className="text-xs text-muted-foreground">{item.variant}</p>
+                    {variantLabel && (
+                      <p className="text-xs text-muted-foreground">{variantLabel}</p>
                     )}
                     <PriceTag
-                      price={item.product.price}
+                      price={displayPrice}
                       currency={item.product.currency}
                       className="text-sm mt-0.5"
                     />
@@ -74,7 +89,7 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => removeItem(item.product.id, item.variant)}
+                      onClick={() => removeItem(item.product.id, item.variant, item.sku_id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
@@ -83,7 +98,7 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variant)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variant, item.sku_id)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -92,7 +107,7 @@ export function CartDrawer({ open, onClose, onCheckout, className }: CartDrawerP
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.variant)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.variant, item.sku_id)}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>

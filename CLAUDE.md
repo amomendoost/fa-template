@@ -63,6 +63,95 @@ Routes are defined in `src/App.tsx`. Add new routes above the catch-all `*` rout
 </Routes>
 ```
 
+#### Current Routes
+
+| Route | Page | Auth Required | Description |
+|-------|------|--------------|-------------|
+| `/` | Index | No | Landing page |
+| `/shop` | ShopPage | No | Product listing with filters |
+| `/shop/:slug` | ProductPage | No | Product detail |
+| `/shop/:slug/book` | BookingPage | No | Booking slot selection |
+| `/checkout` | CheckoutPage | No | Cart checkout |
+| `/order` | OrderTrackingPage | No | Order status tracking |
+| `/login` | LoginPage | No | OTP phone login |
+| `/dashboard` | DashboardPage | Yes | User dashboard (orders, subscriptions, courses, downloads) |
+| `/courses/:courseId` | CoursePage | Yes | Course player |
+| `/payment/callback` | PaymentCallbackPage | No | Payment gateway callback |
+| `/blog` | BlogPage | No | Blog listing |
+| `/blog/:slug` | BlogPostPage | No | Blog post detail |
+
+### Authentication System
+
+OTP-based phone authentication with service layer pattern.
+
+#### Auth Flow
+1. User enters phone number → `requestOtp(phone)` sends SMS
+2. User enters 6-digit code → `verifyOtp(phone, token)` returns session
+3. Session stored in localStorage (`auth_session` + `auth_token`)
+4. `AuthGuard` component wraps protected pages
+
+#### Auth Files
+- `src/lib/auth/service.ts` — OTP request/verify, session management, listener pattern
+- `src/lib/auth/types.ts` — `AuthSession`, `AuthUser` interfaces
+- `src/hooks/use-auth.ts` — React hook wrapping auth service
+- `src/components/auth/LoginDialog.tsx` — Modal OTP login
+- `src/components/auth/AuthGuard.tsx` — Protected route wrapper
+- `src/components/auth/UserMenu.tsx` — Header user dropdown or login button
+
+### Product Type System
+
+Products support 7 types (`product_kind` field):
+
+| Kind | Label | Fulfillment | UI |
+|------|-------|-------------|-----|
+| `physical` | فیزیکی | ship | Standard add-to-cart |
+| `digital` | دیجیتال | download | Download button in dashboard |
+| `license_key` | لایسنس | license_key | Masked key with copy |
+| `booking` | رزرو | booking_confirm | Calendar → slot picker → hold |
+| `course` | دوره آموزشی | course_enroll | Course player with progress |
+| `subscription` | اشتراک | recurring billing | Subscription management |
+| `manual` | سفارشی | manual | Standard add-to-cart |
+
+#### SKU Variant System
+Products can have `skus[]` with `variant_combo` (e.g. `{ "Color": "Red", "Size": "L" }`).
+`SkuVariantPicker` component handles axis selection with per-SKU price/stock.
+Falls back to legacy `ProductVariant` if no SKUs.
+
+### New Component Directories
+
+```
+src/components/auth/            # Auth components (LoginDialog, AuthGuard, UserMenu)
+src/components/shop/booking/    # BookingCalendar, SlotPicker, BookingHoldBanner
+src/components/shop/courses/    # CourseCard, CoursePlayer, LessonContent
+src/components/shop/subscriptions/ # SubscriptionCard, SubscriptionList
+src/components/shop/fulfillment/   # FulfillmentStatus, DownloadButton, LicenseKeyDisplay
+```
+
+### New Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `use-auth` | OTP auth state (login, verify, logout) |
+| `use-booking` | Fetch booking slots for a product |
+| `use-subscriptions` | User subscriptions (cancel, renew) |
+| `use-courses` | User courses + course content with progress |
+| `use-fulfillments` | Order fulfillments + entitlements + download |
+
+### Service Layer Additions (`src/lib/shop/service.ts`)
+
+| Function | Auth | Description |
+|----------|------|-------------|
+| `getBookingSlots(productId, date?)` | No | Available booking slots |
+| `holdBookingSlot(slotId, ...)` | No | Hold a slot temporarily |
+| `getMySubscriptions(status?)` | Yes | User's subscriptions |
+| `cancelSubscription(id, immediate?)` | Yes | Cancel subscription |
+| `renewSubscription(id)` | Yes | Renew expired subscription |
+| `getMyCourses()` | Yes | User's enrolled courses |
+| `getCourseContent(courseId)` | Yes | Course modules + progress |
+| `updateCourseProgress(...)` | Yes | Mark lesson complete / report watch time |
+| `getOrderFulfillments(orderId)` | Optional | Fulfillments + entitlements |
+| `downloadFile(fulfillmentId, fileId)` | Optional | Get download URL |
+
 ### Design System Integration
 
 This project uses a sophisticated design system based on comprehensive instructions in `.github/instructions/` and `.cursor/rules/`. Key principles:

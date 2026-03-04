@@ -112,15 +112,25 @@ export function CheckoutForm({
           <CardTitle className="text-lg">خلاصه سفارش</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {items.map((item) => (
-            <div key={`${item.product.id}-${item.variant || ''}`} className="flex justify-between text-sm">
-              <span>
-                {item.product.name} x {item.quantity}
-                {item.variant && <span className="text-muted-foreground"> ({item.variant})</span>}
-              </span>
-              <PriceTag price={item.product.price * item.quantity} currency={item.product.currency} />
-            </div>
-          ))}
+          {items.map((item) => {
+            const variantLabel = item.variant_choice && Object.keys(item.variant_choice).length > 0
+              ? Object.entries(item.variant_choice).map(([k, v]) => `${k}: ${v}`).join(' | ')
+              : item.variant || '';
+            const skuPrice = item.sku_id && item.product.skus
+              ? item.product.skus.find(s => s.id === item.sku_id)?.price
+              : undefined;
+            const itemPrice = skuPrice ?? item.product.price;
+
+            return (
+              <div key={`${item.product.id}-${item.sku_id || item.variant || ''}`} className="flex justify-between text-sm">
+                <span>
+                  {item.product.name} x {item.quantity}
+                  {variantLabel && <span className="text-muted-foreground"> ({variantLabel})</span>}
+                </span>
+                <PriceTag price={itemPrice * item.quantity} currency={item.product.currency} />
+              </div>
+            );
+          })}
           <Separator className="my-2" />
           <div className="flex justify-between font-bold">
             <span>جمع کل</span>

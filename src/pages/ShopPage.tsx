@@ -11,6 +11,7 @@ import { CategoryFilter } from '@/components/shop/CategoryFilter';
 import { SortSelect } from '@/components/shop/SortSelect';
 import { PriceRangeFilter } from '@/components/shop/PriceRangeFilter';
 import { CartDrawer } from '@/components/shop/CartDrawer';
+import { UserMenu } from '@/components/auth/UserMenu';
 import { useCart } from '@/hooks/use-cart';
 import { getCategories } from '@/lib/shop/service';
 import type { ProductCategory } from '@/lib/shop/types';
@@ -112,14 +113,17 @@ export default function ShopPage() {
             <button onClick={() => navigate('/')} className="text-lg font-bold">
               فروشگاه
             </button>
-            <Button variant="ghost" size="icon" className="relative" onClick={() => setCartOpen(true)}>
-              <ShoppingCart className="h-5 w-5" />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-foreground text-background text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                  {count}
-                </span>
-              )}
-            </Button>
+            <div className="flex items-center gap-1">
+              <UserMenu />
+              <Button variant="ghost" size="icon" className="relative" onClick={() => setCartOpen(true)}>
+                <ShoppingCart className="h-5 w-5" />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-foreground text-background text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
