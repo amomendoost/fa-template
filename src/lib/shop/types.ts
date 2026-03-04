@@ -246,6 +246,7 @@ export interface CourseLesson {
   id: string;
   title: string;
   type: 'video' | 'text' | 'quiz';
+  content?: string;
   content_url?: string;
   duration_minutes?: number;
   sort_order?: number;

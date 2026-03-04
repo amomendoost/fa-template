@@ -50,6 +50,12 @@ export function CoursePlayer({ modules, progress, onLessonComplete, onProgressUp
   const completedCount = progress.filter(p => p.completed).length;
   const progressPercent = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
 
+  // Find the parent module ID for a given lesson
+  const findModuleId = useCallback((lessonId: string): string => {
+    const mod = modules.find(m => m.lessons.some(l => l.id === lessonId));
+    return mod?.id || '';
+  }, [modules]);
+
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => {
       const next = new Set(prev);
@@ -122,9 +128,9 @@ export function CoursePlayer({ modules, progress, onLessonComplete, onProgressUp
                             <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           )}
                           <span className="flex-1 line-clamp-1">{lesson.title}</span>
-                          {lesson.duration_seconds && (
+                          {lesson.duration_minutes && (
                             <span className="text-[11px] text-muted-foreground shrink-0">
-                              {Math.ceil(lesson.duration_seconds / 60).toLocaleString('fa-IR')} دقیقه
+                              {lesson.duration_minutes.toLocaleString('fa-IR')} دقیقه
                             </span>
                           )}
                         </button>
@@ -149,7 +155,7 @@ export function CoursePlayer({ modules, progress, onLessonComplete, onProgressUp
                   variant="outline"
                   size="sm"
                   className="gap-1.5 shrink-0"
-                  onClick={() => onLessonComplete(activeLesson.id, activeLesson.module_id)}
+                  onClick={() => onLessonComplete(activeLesson.id, findModuleId(activeLesson.id))}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   تکمیل درس
@@ -158,7 +164,7 @@ export function CoursePlayer({ modules, progress, onLessonComplete, onProgressUp
             </div>
             <LessonContent
               lesson={activeLesson}
-              onProgressUpdate={onProgressUpdate ? (seconds) => onProgressUpdate(activeLesson.id, activeLesson.module_id, seconds) : undefined}
+              onProgressUpdate={onProgressUpdate ? (seconds) => onProgressUpdate(activeLesson.id, findModuleId(activeLesson.id), seconds) : undefined}
             />
           </div>
         ) : (

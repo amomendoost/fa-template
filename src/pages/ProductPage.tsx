@@ -59,8 +59,8 @@ export default function ProductPage() {
         <>
           <title>{pageTitle}</title>
           <meta name="description" content={pageDesc} />
-          {product.meta_keywords?.length && (
-            <meta name="keywords" content={product.meta_keywords.join(', ')} />
+          {product.meta_keywords && (
+            <meta name="keywords" content={product.meta_keywords} />
           )}
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDesc} />
