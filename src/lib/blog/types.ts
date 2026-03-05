@@ -15,7 +15,7 @@ export interface BlogPost {
   reading_time?: number;
   seo_title?: string;
   seo_description?: string;
-  meta_keywords?: string[];
+  meta_keywords?: string[] | string;
   published_at?: string;
   created_at?: string;
 }

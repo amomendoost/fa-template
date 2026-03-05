@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { toEnDigits } from '@/lib/utils';
 
 interface LoginDialogProps {
   open: boolean;
@@ -72,7 +73,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
               dir="ltr"
               placeholder="09123456789"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(toEnDigits(e.target.value))}
               className="text-center text-lg tracking-wider"
               autoFocus
             />
@@ -90,7 +91,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
               inputMode="numeric"
               placeholder="کد ۶ رقمی"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) => setCode(toEnDigits(e.target.value).replace(/\D/g, '').slice(0, 6))}
               className="text-center text-2xl tracking-[0.5em] font-mono"
               autoFocus
               maxLength={6}

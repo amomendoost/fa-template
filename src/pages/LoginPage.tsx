@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { toEnDigits } from '@/lib/utils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ export default function LoginPage() {
                 dir="ltr"
                 placeholder="09123456789"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(toEnDigits(e.target.value))}
                 className="text-center text-lg tracking-wider"
                 autoFocus
               />
@@ -80,7 +81,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 placeholder="کد ۶ رقمی"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => setCode(toEnDigits(e.target.value).replace(/\D/g, '').slice(0, 6))}
                 className="text-center text-2xl tracking-[0.5em] font-mono"
                 autoFocus
                 maxLength={6}

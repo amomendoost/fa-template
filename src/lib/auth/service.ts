@@ -1,5 +1,6 @@
 // Auth Service - OTP-based authentication
 import type { AuthSession } from './types';
+import { toEnDigits } from '@/lib/utils';
 
 const SESSION_KEY = 'auth_session';
 const TOKEN_KEY = 'auth_token';
@@ -22,7 +23,7 @@ const ERROR_MAP: Record<string, string> = {
 function translateError(msg: string): string {
   if (ERROR_MAP[msg]) return ERROR_MAP[msg];
   if (msg.includes('SMS integration') || msg.includes('Kavenegar'))
-    return 'سرویس پیامک فعال نیست. لطفاً با پشتیبانی تماس بگیرید';
+    return 'سرویس پیامک فعال نیست. (از بخش مدیریت سایت → اینتگریشن‌ها، سرویس پیامک را فعال کنید)';
   if (msg.includes('Rate limit') || msg.includes('Too many'))
     return 'تعداد درخواست‌ها زیاد شد. لطفاً کمی صبر کنید';
   return msg;
@@ -66,10 +67,11 @@ function clearSession() {
 }
 
 export async function requestOtp(phone: string): Promise<{ success: boolean; message?: string }> {
+  const normalizedPhone = toEnDigits(phone.trim());
   const res = await fetch(`${getBaseUrl()}/auth/otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone }),
+    body: JSON.stringify({ phone: normalizedPhone }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(translateError(data.error || 'Failed to send OTP'));
@@ -77,10 +79,12 @@ export async function requestOtp(phone: string): Promise<{ success: boolean; mes
 }
 
 export async function verifyOtp(phone: string, token: string): Promise<AuthSession> {
+  const normalizedPhone = toEnDigits(phone.trim());
+  const normalizedToken = toEnDigits(token.trim());
   const res = await fetch(`${getBaseUrl()}/auth/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, token }),
+    body: JSON.stringify({ phone: normalizedPhone, token: normalizedToken }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(translateError(data.error || 'Verification failed'));

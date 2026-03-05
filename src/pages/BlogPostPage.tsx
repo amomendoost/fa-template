@@ -42,7 +42,7 @@ export default function BlogPostPage() {
         datePublished: post.published_at || post.created_at || '',
         url: pageUrl,
         ...(post.reading_time ? { timeRequired: `PT${post.reading_time}M` } : {}),
-        ...(post.meta_keywords?.length ? { keywords: post.meta_keywords.join(', ') } : {}),
+        ...(post.meta_keywords?.length ? { keywords: Array.isArray(post.meta_keywords) ? post.meta_keywords.join(', ') : post.meta_keywords } : {}),
       }
     : null;
 
@@ -55,7 +55,7 @@ export default function BlogPostPage() {
           <title>{post.seo_title || post.title}</title>
           <meta name="description" content={post.seo_description || post.excerpt || ''} />
           {post.meta_keywords?.length && (
-            <meta name="keywords" content={post.meta_keywords.join(', ')} />
+            <meta name="keywords" content={Array.isArray(post.meta_keywords) ? post.meta_keywords.join(', ') : post.meta_keywords} />
           )}
           <meta property="og:type" content="article" />
           <meta property="og:title" content={post.seo_title || post.title} />

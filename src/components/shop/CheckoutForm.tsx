@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, CreditCard } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, toEnDigits } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
 import { useCheckout } from '@/hooks/use-checkout';
 import { PriceTag } from './PriceTag';
@@ -166,7 +166,7 @@ export function CheckoutForm({
                 required
                 dir="ltr"
                 value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
+                onChange={(e) => update('phone', toEnDigits(e.target.value))}
                 placeholder="09123456789"
               />
             </div>
