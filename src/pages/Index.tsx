@@ -1,7 +1,6 @@
-import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Code, Paintbrush, CreditCard, Blocks } from "lucide-react";
+import { Code, CreditCard, Blocks, Languages } from "lucide-react";
 
 const features = [
   {
@@ -10,14 +9,14 @@ const features = [
     description: "مجموعه کاملی از کامپوننت‌های shadcn/ui با پشتیبانی RTL",
   },
   {
-    icon: Paintbrush,
-    title: "تم روشن و تاریک",
-    description: "سیستم تم با next-themes و متغیرهای CSS",
+    icon: Languages,
+    title: "فارسی‌سازی کامل",
+    description: "تقویم شمسی، اعداد فارسی، فونت وزیرمتن",
   },
   {
     icon: Code,
-    title: "توابع فارسی‌سازی",
-    description: "تاریخ شمسی، اعداد فارسی، اعتبارسنجی موبایل و کارت",
+    title: "توابع کاربردی",
+    description: "اعتبارسنجی موبایل و کارت بانکی، فرم‌های آماده با Zod",
   },
   {
     icon: CreditCard,
@@ -34,7 +33,6 @@ const Index = () => {
         {/* Header */}
         <header className="flex items-center justify-between py-6">
           <span className="text-sm text-muted-foreground">noqte-template</span>
-          <ThemeToggle />
         </header>
 
         {/* Hero */}

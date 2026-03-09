@@ -21,7 +21,7 @@ bg-white text-slate-900          // 21:1 ratio
 bg-slate-50 text-slate-800       // 16.7:1 ratio
 bg-blue-50 text-blue-900         // 14.2:1 ratio
 
-// Dark backgrounds  
+// Colored section backgrounds (e.g. hero, CTA)
 bg-slate-900 text-white          // 21:1 ratio
 bg-slate-800 text-slate-100      // 15.8:1 ratio
 bg-blue-900 text-blue-50         // 18.1:1 ratio

@@ -4,6 +4,7 @@
 import { useNavigate } from 'react-router-dom';
 import { usePaymentVerify } from '@/hooks/use-payment-verify';
 import { PaymentStatus } from './PaymentStatus';
+import { extractTrackIdFromUrl } from '@/lib/payment/service';
 import type { PaymentCallbackProps, PaymentStatus as PaymentStatusType } from '@/lib/payment/types';
 
 export function PaymentCallback({
@@ -14,6 +15,7 @@ export function PaymentCallback({
   failureRedirect,
 }: PaymentCallbackProps) {
   const navigate = useNavigate();
+  const trackId = extractTrackIdFromUrl(gateway);
 
   const { isVerifying, data, isSuccess, error } = usePaymentVerify({
     gateway,
@@ -28,6 +30,9 @@ export function PaymentCallback({
 
   // Determine the status to show
   let status: PaymentStatusType | 'loading' | 'verifying' = 'verifying';
+  if (!trackId && !isVerifying && !data) {
+    status = 'failed';
+  }
   if (!isVerifying && data) {
     status = isSuccess ? 'paid' : 'failed';
   }

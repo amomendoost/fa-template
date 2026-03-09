@@ -20,6 +20,11 @@ function getBaseUrl(): string {
   return url;
 }
 
+// Public project key required for guest integration calls
+function getProjectApiKey(): string | null {
+  return import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || null;
+}
+
 // Get auth token for API calls
 async function getAuthToken(): Promise<string | null> {
   if (!isSupabaseConfigured() || !supabase) {
@@ -39,6 +44,7 @@ export async function createPayment(
 ): Promise<PaymentResponse> {
   const baseUrl = getBaseUrl();
   const token = await getAuthToken();
+  const projectApiKey = getProjectApiKey();
   const config = getGateway(gateway);
 
   // Build callback URL if not provided
@@ -83,6 +89,7 @@ export async function createPayment(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(projectApiKey && { 'x-project-api-key': projectApiKey }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify(body),
@@ -94,7 +101,7 @@ export async function createPayment(
     if (!response.ok || !data.success) {
       return {
         success: false,
-        error: data.error || 'Payment creation failed',
+        error: data.error || 'خطا در ایجاد پرداخت',
       };
     }
 
@@ -109,7 +116,7 @@ export async function createPayment(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error',
+      error: error instanceof Error ? error.message : 'خطا در ارتباط با سرور',
     };
   }
 }
@@ -124,6 +131,7 @@ export async function verifyPayment(
 ): Promise<PaymentVerifyResponse> {
   const baseUrl = getBaseUrl();
   const token = await getAuthToken();
+  const projectApiKey = getProjectApiKey();
   const config = getGateway(gateway);
 
   try {
@@ -133,6 +141,7 @@ export async function verifyPayment(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(projectApiKey && { 'x-project-api-key': projectApiKey }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({
@@ -147,7 +156,7 @@ export async function verifyPayment(
     if (!response.ok) {
       return {
         success: false,
-        error: data.error || 'Verification failed',
+        error: data.error || 'خطا در تأیید پرداخت',
       };
     }
 
@@ -172,12 +181,12 @@ export async function verifyPayment(
         amount: data.data?.amount,
         ...data.data,
       },
-      error: isSuccess ? undefined : data.error || 'Payment was not successful',
+      error: isSuccess ? undefined : data.error || 'پرداخت موفق نبود',
     };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error',
+      error: error instanceof Error ? error.message : 'خطا در ارتباط با سرور',
     };
   }
 }

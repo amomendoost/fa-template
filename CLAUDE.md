@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Development
 - `npm run dev` - Start development server on port 8080
-- `npm run build` - Create production build
+- `npm run build` - Run typecheck + create production build
 - `npm run build:dev` - Create development build
+- `npm run typecheck` - Run TypeScript type checking (catches missing JSX imports / undefined components)
 - `npm run lint` - Run ESLint linter
 - `npm run preview` - Preview production build locally
 
@@ -62,6 +63,95 @@ Routes are defined in `src/App.tsx`. Add new routes above the catch-all `*` rout
 </Routes>
 ```
 
+#### Current Routes
+
+| Route | Page | Auth Required | Description |
+|-------|------|--------------|-------------|
+| `/` | Index | No | Landing page |
+| `/shop` | ShopPage | No | Product listing with filters |
+| `/shop/:slug` | ProductPage | No | Product detail |
+| `/shop/:slug/book` | BookingPage | No | Booking slot selection |
+| `/checkout` | CheckoutPage | No | Cart checkout |
+| `/order` | OrderTrackingPage | No | Order status tracking |
+| `/login` | LoginPage | No | OTP phone login |
+| `/dashboard` | DashboardPage | Yes | User dashboard (orders, subscriptions, courses, downloads) |
+| `/courses/:courseId` | CoursePage | Yes | Course player |
+| `/payment/callback` | PaymentCallbackPage | No | Payment gateway callback |
+| `/blog` | BlogPage | No | Blog listing |
+| `/blog/:slug` | BlogPostPage | No | Blog post detail |
+
+### Authentication System
+
+OTP-based phone authentication with service layer pattern.
+
+#### Auth Flow
+1. User enters phone number → `requestOtp(phone)` sends SMS
+2. User enters 6-digit code → `verifyOtp(phone, token)` returns session
+3. Session stored in localStorage (`auth_session` + `auth_token`)
+4. `AuthGuard` component wraps protected pages
+
+#### Auth Files
+- `src/lib/auth/service.ts` — OTP request/verify, session management, listener pattern
+- `src/lib/auth/types.ts` — `AuthSession`, `AuthUser` interfaces
+- `src/hooks/use-auth.ts` — React hook wrapping auth service
+- `src/components/auth/LoginDialog.tsx` — Modal OTP login
+- `src/components/auth/AuthGuard.tsx` — Protected route wrapper
+- `src/components/auth/UserMenu.tsx` — Header user dropdown or login button
+
+### Product Type System
+
+Products support 7 types (`product_kind` field):
+
+| Kind | Label | Fulfillment | UI |
+|------|-------|-------------|-----|
+| `physical` | فیزیکی | ship | Standard add-to-cart |
+| `digital` | دیجیتال | download | Download button in dashboard |
+| `license_key` | لایسنس | license_key | Masked key with copy |
+| `booking` | رزرو | booking_confirm | Calendar → slot picker → hold |
+| `course` | دوره آموزشی | course_enroll | Course player with progress |
+| `subscription` | اشتراک | recurring billing | Subscription management |
+| `manual` | سفارشی | manual | Standard add-to-cart |
+
+#### SKU Variant System
+Products can have `skus[]` with `variant_combo` (e.g. `{ "Color": "Red", "Size": "L" }`).
+`SkuVariantPicker` component handles axis selection with per-SKU price/stock.
+Falls back to legacy `ProductVariant` if no SKUs.
+
+### New Component Directories
+
+```
+src/components/auth/            # Auth components (LoginDialog, AuthGuard, UserMenu)
+src/components/shop/booking/    # BookingCalendar, SlotPicker, BookingHoldBanner
+src/components/shop/courses/    # CourseCard, CoursePlayer, LessonContent
+src/components/shop/subscriptions/ # SubscriptionCard, SubscriptionList
+src/components/shop/fulfillment/   # FulfillmentStatus, DownloadButton, LicenseKeyDisplay
+```
+
+### New Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `use-auth` | OTP auth state (login, verify, logout) |
+| `use-booking` | Fetch booking slots for a product |
+| `use-subscriptions` | User subscriptions (cancel, renew) |
+| `use-courses` | User courses + course content with progress |
+| `use-fulfillments` | Order fulfillments + entitlements + download |
+
+### Service Layer Additions (`src/lib/shop/service.ts`)
+
+| Function | Auth | Description |
+|----------|------|-------------|
+| `getBookingSlots(productId, date?)` | No | Available booking slots |
+| `holdBookingSlot(slotId, ...)` | No | Hold a slot temporarily |
+| `getMySubscriptions(status?)` | Yes | User's subscriptions |
+| `cancelSubscription(id, immediate?)` | Yes | Cancel subscription |
+| `renewSubscription(id)` | Yes | Renew expired subscription |
+| `getMyCourses()` | Yes | User's enrolled courses |
+| `getCourseContent(courseId)` | Yes | Course modules + progress |
+| `updateCourseProgress(...)` | Yes | Mark lesson complete / report watch time |
+| `getOrderFulfillments(orderId)` | Optional | Fulfillments + entitlements |
+| `downloadFile(fulfillmentId, fileId)` | Optional | Get download URL |
+
 ### Design System Integration
 
 This project uses a sophisticated design system based on comprehensive instructions in `.github/instructions/` and `.cursor/rules/`. Key principles:
@@ -80,7 +170,7 @@ Over 40 pre-built components available in `src/components/ui/`:
 - Mobile-first responsive design approach
 - Premium, sophisticated visual hierarchy with purposeful color psychology
 - **Accessibility**: Maintain WCAG 2.1 AA contrast ratios (4.5:1 minimum)
-- **Never ship** without running `npm run lint` - must pass without errors
+- **Never ship** without running `npm run lint` and `npm run typecheck` - both must pass
 - **Industry-specific designs**: Adapt visual identity, emotional tone, and color psychology to target audience
 - **Design Philosophy**: Create unique, custom-crafted interfaces that feel premium and engaging
 - **Color Strategy**: Use colors intentionally to evoke the right emotions and enhance user experience
@@ -89,7 +179,7 @@ Over 40 pre-built components available in `src/components/ui/`:
 
 - `vite.config.ts` - Vite configuration with path aliases and port 8080
 - `components.json` - shadcn/ui configuration with default style and slate base color
-- `tailwind.config.ts` - Tailwind configuration with dark mode support
+- `tailwind.config.ts` - Tailwind configuration
 - `tsconfig.json` - TypeScript configuration with strict mode
 
 ### Environment Variables
@@ -107,7 +197,22 @@ Over 40 pre-built components available in `src/components/ui/`:
 - Follow React Hook Form patterns with Zod validation for forms
 - Use TanStack Query for API state management
 - Import UI components from `@/components/ui/`
+- After adding any JSX component (`<Input />`, `<Dialog />`, etc.), verify the component is imported in the same file
+- Runtime pattern to avoid: `ReferenceError: X is not defined` usually means a missing import that Vite build alone may not catch
 - Use the toast system via `use-toast` hook for notifications
+
+#### Icon Import Safety (lucide-react)
+- Do not assume icon names exist in `lucide-react`; verify exports before importing.
+- Preferred check before adding/changing an icon import:
+  - `rg -n "export \\{.*<IconName>" node_modules/lucide-react/dist/esm/lucide-react.js`
+- If an icon is not exported, use one of these fallbacks:
+  - Replace with a close Lucide icon (for example `Send`, `SendHorizontal`, `MessageCircle`).
+  - Use inline SVG for brand logos (Telegram, X, LinkedIn, etc.) when exact branding is needed.
+  - Use `react-icons` only if the project already depends on it or there is a clear need.
+- Common build failure pattern to avoid:
+  - `"X is not exported by lucide-react"` means the import name is invalid for the installed version.
+- Before finishing icon-related edits, run:
+  - `npm run build`
 
 #### Cursor Rules Integration
 This project includes comprehensive Cursor rules in `.cursor/rules/` that auto-apply based on file context:
@@ -290,3 +395,37 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 - Use `tomansToRials(10000)` → `100000` Rials
 - Use `rialsToTomans(100000)` → `10000` Tomans
 - Use `formatAmount(100000, 'IRR')` → `"۱۰,۰۰۰ تومان"`
+
+## Icons - lucide-react
+
+This project uses **lucide-react** for icons. **Do NOT guess icon names.** Always verify before using.
+
+```tsx
+import { IconName } from "lucide-react";
+// Usage: <IconName className="h-4 w-4" />
+```
+
+### How to verify an icon exists
+Before using any icon, verify it exists by checking the installed package:
+```bash
+# Search for an icon by keyword (e.g. "cart", "user", "bell")
+ls node_modules/lucide-react/dist/esm/icons/ | grep -i "cart"
+```
+Icon filenames use kebab-case (`shopping-cart.js`), but imports use PascalCase (`ShoppingCart`).
+Conversion: `shopping-cart` → `ShoppingCart`, `arrow-up-right` → `ArrowUpRight`
+
+### Common mistakes to avoid
+- `LayoutDashboard` exists, NOT ~~`Dashboard`~~
+- `Settings` exists, NOT ~~`Gear`~~
+- `Trash2` exists, NOT ~~`DeleteIcon`~~
+- `Eye` / `EyeOff` exist, NOT ~~`Visibility`~~
+- `LogIn` / `LogOut` exist, NOT ~~`Login`~~ / ~~`Logout`~~
+- `MessageSquare` exists, NOT ~~`Chat`~~ or ~~`Comment`~~
+- `Bell` exists, NOT ~~`Notification`~~
+- `MapPin` exists, NOT ~~`Location`~~
+- `Pencil` exists, NOT ~~`EditIcon`~~
+- `TriangleAlert` exists, NOT ~~`Warning`~~
+- `Loader2` is the spinner, NOT ~~`Spinner`~~
+- `Send` exists, NOT ~~`PaperPlane`~~
+- `ShoppingCart` exists, NOT ~~`Cart`~~
+- `Smartphone` exists, NOT ~~`Mobile`~~

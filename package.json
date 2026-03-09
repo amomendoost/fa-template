@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -47,10 +48,10 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "date-fns-jalali": "^4.1.0-0",
+    "dompurify": "^3.3.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.553.0",
-    "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.0",
@@ -67,6 +68,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
