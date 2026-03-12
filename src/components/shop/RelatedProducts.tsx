@@ -14,18 +14,17 @@ interface RelatedProductsProps {
 }
 
 export function RelatedProducts({ slug, className }: RelatedProductsProps) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [result, setResult] = useState<{ slug?: string; products: Product[] }>({ products: [] });
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const products = result.slug === slug ? result.products : [];
+  const isLoading = Boolean(slug) && result.slug !== slug;
 
   useEffect(() => {
-    setIsLoading(true);
     getRelatedProducts(slug)
-      .then(setProducts)
-      .catch(() => setProducts([]))
-      .finally(() => setIsLoading(false));
+      .then((data) => setResult({ slug, products: data }))
+      .catch(() => setResult({ slug, products: [] }));
   }, [slug]);
 
   const checkScroll = () => {

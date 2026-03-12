@@ -7,8 +7,8 @@ import type { Subscription } from '@/lib/shop/types';
 interface SubscriptionListProps {
   subscriptions: Subscription[];
   isLoading?: boolean;
-  onCancel?: (id: string) => Promise<void>;
-  onRenew?: (id: string) => Promise<void>;
+  onCancel?: (id: string) => Promise<unknown>;
+  onRenew?: (id: string) => Promise<unknown>;
   className?: string;
 }
 

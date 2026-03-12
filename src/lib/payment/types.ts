@@ -75,9 +75,11 @@ export interface PaymentVerifyResponse {
     /** Reference number from bank */
     refNumber?: string;
     ref_id?: string;
+    Shaparak_Ref_Id?: string;
     /** Masked card number */
     cardNumber?: string;
     card_pan?: string;
+    card_number?: string;
     /** Amount paid */
     amount?: number;
     /** Original gateway-specific data */

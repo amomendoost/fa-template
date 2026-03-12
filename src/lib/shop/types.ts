@@ -34,6 +34,9 @@ export interface Product {
   product_kind?: ProductKind;
   billing_model?: BillingModel;
   fulfillment_type?: FulfillmentType;
+  billing_period?: string;
+  trial_days?: number;
+  booking_duration_minutes?: number;
   type_config?: Record<string, unknown>;
   skus?: ProductSku[];
 }
@@ -106,6 +109,7 @@ export interface OrderItem {
   price: number;
   quantity: number;
   total: number;
+  variant?: string;
   requires_shipping?: boolean;
   sku_id?: string;
   sku_code?: string;
@@ -196,6 +200,7 @@ export interface BookingSlot {
   capacity: number;
   booked_count: number;
   available_spots: number;
+  price?: number;
   status?: string;
 }
 

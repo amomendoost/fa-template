@@ -12,23 +12,22 @@ interface RelatedPostsProps {
 }
 
 export function RelatedPosts({ slug, className }: RelatedPostsProps) {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [result, setResult] = useState<{ slug?: string; posts: BlogPost[] }>({ posts: [] });
+  const posts = result.slug === slug ? result.posts : [];
+  const isLoading = Boolean(slug) && result.slug !== slug;
 
   useEffect(() => {
     if (!slug) return;
     let cancelled = false;
-    setIsLoading(true);
 
     getRelatedPosts(slug)
-      .then((data) => { if (!cancelled) setPosts(data); })
-      .catch(() => { if (!cancelled) setPosts([]); })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
+      .then((data) => { if (!cancelled) setResult({ slug, posts: data }); })
+      .catch(() => { if (!cancelled) setResult({ slug, posts: [] }); });
 
     return () => { cancelled = true; };
   }, [slug]);
 
-  if (!isLoading && posts.length === 0) return null;
+  if (!slug || (!isLoading && posts.length === 0)) return null;
 
   return (
     <div className={cn('space-y-4', className)}>

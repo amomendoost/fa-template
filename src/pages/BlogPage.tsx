@@ -33,7 +33,7 @@ export default function BlogPage() {
   };
 
   const breadcrumbItems = useMemo(() => {
-    const items = [
+    const items: Array<{ label: string; href?: string }> = [
       { label: 'خانه', href: '/' },
       { label: 'بلاگ', href: '/blog' },
     ];

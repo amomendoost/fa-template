@@ -25,8 +25,8 @@ const PERIOD_LABELS: Record<string, string> = {
 
 interface SubscriptionCardProps {
   subscription: Subscription;
-  onCancel?: (id: string) => Promise<void>;
-  onRenew?: (id: string) => Promise<void>;
+  onCancel?: (id: string) => Promise<unknown>;
+  onRenew?: (id: string) => Promise<unknown>;
   className?: string;
 }
 

@@ -12,7 +12,7 @@ interface LessonContentProps {
 
 export function LessonContent({ lesson, onProgressUpdate, className }: LessonContentProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Track video progress
   useEffect(() => {

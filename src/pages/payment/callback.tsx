@@ -35,21 +35,18 @@ export default function PaymentCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [status, setStatus] = useState<VerifyStatus>('verifying');
-  const [refNumber, setRefNumber] = useState<string | null>(null);
-  const [cardNumber, setCardNumber] = useState<string | null>(null);
-  const [orderNumber, setOrderNumber] = useState<string | null>(searchParams.get('orderNumber'));
-  const [error, setError] = useState<string | null>(null);
-
+  const initialOrderNumber = searchParams.get('orderNumber');
   const gateway = detectGatewayFromParams(searchParams);
   const trackId = extractTrackIdFromUrl(gateway, searchParams);
 
+  const [status, setStatus] = useState<VerifyStatus>(() => (trackId ? 'verifying' : 'failed'));
+  const [refNumber, setRefNumber] = useState<string | null>(null);
+  const [cardNumber, setCardNumber] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<string | null>(initialOrderNumber);
+  const [error, setError] = useState<string | null>(() => (trackId ? null : 'کد پیگیری یافت نشد'));
+
   useEffect(() => {
-    if (!trackId) {
-      setStatus('failed');
-      setError('کد پیگیری یافت نشد');
-      return;
-    }
+    if (!trackId) return;
 
     const verify = async () => {
       try {
@@ -65,7 +62,7 @@ export default function PaymentCallbackPage() {
         // Step 2: Update shop order status
         const shopResult = await verifyShopPayment({
           track_id: trackId,
-          order_number: orderNumber || undefined,
+          order_number: initialOrderNumber || undefined,
         });
 
         // Extract order_number from verify response (gateway may strip URL params)
@@ -93,7 +90,7 @@ export default function PaymentCallbackPage() {
     };
 
     verify();
-  }, [gateway, trackId]);
+  }, [gateway, initialOrderNumber, trackId]);
 
   const handleGoToOrder = () => {
     if (orderNumber) {

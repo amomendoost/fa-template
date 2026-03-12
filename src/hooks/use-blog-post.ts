@@ -5,39 +5,51 @@ import { getPost } from '@/lib/blog/service';
 import type { BlogPost, BlogComment } from '@/lib/blog/types';
 
 export function useBlogPost(slug: string | undefined) {
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [comments, setComments] = useState<BlogComment[]>([]);
-  const [isLoading, setIsLoading] = useState(!!slug);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    slug?: string;
+    post: BlogPost | null;
+    comments: BlogComment[];
+    error: string | null;
+  }>({
+    post: null,
+    comments: [],
+    error: null,
+  });
 
   useEffect(() => {
-    if (!slug) {
-      setPost(null);
-      setComments([]);
-      setIsLoading(false);
-      return;
-    }
+    if (!slug) return;
 
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
     getPost(slug)
       .then((data) => {
         if (!cancelled) {
-          setPost(data.post);
-          setComments(data.comments);
+          setResult({
+            slug,
+            post: data.post,
+            comments: data.comments,
+            error: null,
+          });
         }
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'خطا در بارگذاری مطلب');
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setResult({
+            slug,
+            post: null,
+            comments: [],
+            error: err instanceof Error ? err.message : 'خطا در بارگذاری مطلب',
+          });
+        }
       });
 
     return () => { cancelled = true; };
   }, [slug]);
+
+  const post = result.slug === slug ? result.post : null;
+  const comments = result.slug === slug ? result.comments : [];
+  const error = result.slug === slug ? result.error : null;
+  const isLoading = Boolean(slug) && result.slug !== slug;
 
   return { post, comments, isLoading, error };
 }

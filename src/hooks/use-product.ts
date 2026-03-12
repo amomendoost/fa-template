@@ -5,34 +5,46 @@ import { getProduct } from '@/lib/shop/service';
 import type { Product } from '@/lib/shop/types';
 
 export function useProduct(slug: string | undefined) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(!!slug);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    slug?: string;
+    product: Product | null;
+    error: string | null;
+  }>({
+    product: null,
+    error: null,
+  });
 
   useEffect(() => {
-    if (!slug) {
-      setProduct(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!slug) return;
 
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
     getProduct(slug)
       .then((data) => {
-        if (!cancelled) setProduct(data);
+        if (!cancelled) {
+          setResult({
+            slug,
+            product: data,
+            error: null,
+          });
+        }
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'خطا در بارگذاری محصول');
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setResult({
+            slug,
+            product: null,
+            error: err instanceof Error ? err.message : 'خطا در بارگذاری محصول',
+          });
+        }
       });
 
     return () => { cancelled = true; };
   }, [slug]);
+
+  const product = result.slug === slug ? result.product : null;
+  const error = result.slug === slug ? result.error : null;
+  const isLoading = Boolean(slug) && result.slug !== slug;
 
   return { product, isLoading, error };
 }
